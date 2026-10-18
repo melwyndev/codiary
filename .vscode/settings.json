@@ -1,0 +1,44 @@
+{
+  "editor.formatOnSave": true,
+
+  // ── File Watcher Exclusions ────────────────────────────────────────
+  // Prevents the language server and file watcher from indexing build
+  // output, dependency trees, and cache folders — the primary cause of
+  // 10GB+ RAM usage in Next.js / Electron-based editors.
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.next/**": true,
+    "**/.git/**": true,
+    "**/.insforge/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.turbo/**": true,
+    "**/coverage/**": true,
+    "**/tsconfig.tsbuildinfo": true
+  },
+
+  // ── File Explorer Exclusions ───────────────────────────────────────
+  // Hides noisy generated folders from the sidebar.
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/.turbo": true,
+    "**/dist": true
+  },
+
+  // ── TypeScript Server Memory Cap ───────────────────────────────────
+  // Default is uncapped (~8GB). Setting 3072 MB is enough for a
+  // large Next.js codebase while preventing runaway heap growth.
+  "typescript.tsserver.maxTsServerMemory": 3072,
+
+  // Prefer the workspace TypeScript version over the bundled editor one.
+  "typescript.tsdk": "node_modules/typescript/lib",
+
+  // ── Search Exclusions ──────────────────────────────────────────────
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/pnpm-lock.yaml": true,
+    "**/tsconfig.tsbuildinfo": true
+  }
+}

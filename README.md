@@ -1,0 +1,59 @@
+# Codiary - Developer Notes & Architectural Vault
+
+Codiary is a developer notes workspace, code snippet repository, and architectural archive powered by **Next.js**, **Tailwind CSS**, and **InsForge BaaS**.
+
+---
+
+## 📁 File Upload & Document Import Workflows
+
+Codiary supports two product-relevant file workflows designed specifically for developers and engineering teams:
+
+### 1. Document Import (File → Editable Note)
+Import existing local notes or documentation directly into the workspace:
+- **How to use**: Click the **"IMPORT"** button on the Notes Library toolbar or drag and drop a file into the import dialog.
+- **Behavior**: The file is parsed natively in the browser without server latency; the file name is converted into the document title, and a new editable document is immediately created in InsForge PostgreSQL and opened in the Block Editor.
+- **Supported File Types**:
+  - `.md` — Markdown document (extracts title from `# Heading` or file name)
+  - `.txt` — Plain text note
+  - `.json` — Codiary note or multi-note vault export
+- **File Size Limit**: Up to **10 MB** per imported document.
+
+### 2. Document Attachments (File → Attached Asset in a Note)
+Attach reference architecture diagrams, specifications, archives, or datasets directly to any document:
+- **How to use**: Open any note, click **"Attach"** in the header or **"Attach File"** in the Attachments bar right beneath the metadata tags.
+- **Behavior**: Files are uploaded to the secure InsForge cloud storage bucket (`note-attachments`). Uploaded assets display with file-type badges, file size (KB/MB), upload timestamp, a download link, and deletion controls.
+- **Supported Attachment Types**:
+  - `.pdf` — Technical RFCs, design specifications, whitepapers
+  - `.docx` / `.doc` — Word documents and project briefs
+  - `.png` / `.jpg` / `.jpeg` — Architecture diagrams, flowcharts, screenshots
+  - `.zip` — Code bundles, reproduction packages, asset archives
+  - `.txt` — Logs, sample data, configuration dumps
+- **File Size Limit**: Up to **10 MB** per uploaded attachment.
+
+---
+
+## 🚀 Key Features
+
+- **Block & Markdown Editor**: Block-based canvas editor with slash commands (`/code`, `/heading`, `/table`, `/checklist`).
+- **Semantic Vector Search**: Integrated with InsForge pgvector (384-dimensional embeddings) to find notes by concept and meaning.
+- **Document Sharing & Permissions**: Share documents with collaborators by email with **Viewer** (read-only) or **Editor** (read/write) access.
+- **Relational Tagging System**: Multi-tag filtering and tag suggestion autocomplete.
+- **Local-First Speed with Cloud Persistence**: Instant frame-0 rendering backed by PostgreSQL and PostgREST via InsForge SDK.
+
+---
+
+## 🛠️ Getting Started
+
+### 1. Install Dependencies
+```bash
+pnpm install
+# or npm install
+```
+
+### 2. Run Locally
+```bash
+pnpm dev
+# or npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
