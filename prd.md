@@ -1,199 +1,129 @@
-# Codiary PRD
+# Codiary PRD (Product Requirements Document)
 
 ## Project Overview
 
-`Codiary` is a private, AI-powered note vault built for engineers who want one
-place to capture ideas, research, decisions, and working context. At its core,
-it combines a clean note editor with autosave, tags, image attachments,
-AI-generated summaries and titles, and semantic search so users can find notes
-by meaning instead of exact keywords. The product is positioned like a "second
-brain" for technical people: less about generic note-taking and more about
-storing and retrieving useful context while building software. It is a
-single-user workspace today, with authentication and per-user data isolation
-baked into the experience. In simple terms: `Codiary` helps engineers write
-things down quickly, organize them automatically, and resurface them later when
-they matter.
+`Codiary` is a modern, AI-powered engineering notebook and collaborative document vault designed for developers, technical founders, and builders. It serves as an engineer's "second brain"—a single place to capture ideas, architecture decisions, research, code snippets, and working context.
+
+Codiary pairs a distraction-free block editor (with autosave, tag taxonomy, and inline image attachments) with automated AI organization (summaries, smart titles, and tagging), granular role-based sharing (`viewer` vs. `editor`), multi-format file import/export, and semantic search powered by vector embeddings.
+
+---
 
 ## High-Level Summary
 
-`Codiary` is a modern web app concept built around private note-taking,
-AI-assisted organization, and fast retrieval of knowledge. The main product loop
-is straightforward: sign in, create a note, write freely, let the app auto-save,
-optionally let AI organize the note, attach images, and later retrieve that note
-either through filters or semantic search.
+The core product loop in Codiary:
+1. **Capture & Import**: Create notes from scratch or import existing technical documents across multiple formats (`.md`, `.txt`, `.json`, `.csv`, `.py`, `.js`, `.ts`, `.tsx`, etc.).
+2. **Draft & Edit**: Write freely in a responsive block editor with debounced autosave, markdown formatting, and inline image attachments.
+3. **AI-Assisted Organization**: Run one-click AI auto-organization to generate concise executive summaries, improved technical titles, and taxonomy tags.
+4. **Retrieve & Recall**: Surface notes instantly either via keyword/tag filters or by natural-language semantic meaning via a `Cmd+K` / `Ctrl+K` command palette powered by vector embeddings.
+5. **Collaborate & Share**: Share notes with collaborators by email with granular role-based permissions (`viewer` for read-only access and `editor` for collaborative modifications).
 
-What makes it feel like more than a basic notes app is the organization layer.
-Notes support tags, AI-generated summaries, and embeddings for meaning-based
-search. That means the product solves not just "where do I write this down?" but
-also "how do I find and reuse my thinking later?"
-
-The initial version of `Codiary` should stay intentionally focused on personal
-knowledge management rather than collaboration. Billing, team workspaces, shared
-editing, and version history are outside the initial scope and can be explored
-later if the core product proves valuable.
+---
 
 ## Product Name
 
 `Codiary`
 
+---
+
 ## Product Summary
 
-`Codiary` is an AI-assisted personal knowledge vault for engineers. It gives
-users a private space to capture notes, attach supporting images, organize
-information with tags and AI-generated metadata, and retrieve knowledge through
-both traditional filtering and semantic search.
+`Codiary` is an AI-assisted knowledge vault and collaborative document workspace for software engineers. It combines fast capture, multi-format file import, AI-powered structure extraction, granular access permissions, and semantic vector recall in a high-contrast developer aesthetic.
 
-## Problem Statement
-
-Engineers constantly accumulate fragmented context across docs, tabs, chats,
-snippets, and half-finished ideas. Traditional note apps are good at storage but
-weak at recall, structure, and fast retrieval of technical context. `Codiary`
-aims to reduce that friction by making notes easy to capture, intelligently
-organized, and meaningfully searchable.
+---
 
 ## Target Users
 
-- Individual engineers
-- Indie hackers and builders
-- Technical founders
-- Developers doing research, planning, debugging, or architecture work
+- **Software Engineers & Architects**: Documenting architecture decisions, debugging traces, API specs, and technical RFCs.
+- **Indie Hackers & Technical Founders**: Maintaining product roadmaps, release notes, and technical knowledge bases.
+- **Engineering Teams**: Collaborating on internal technical documentation with clear read/write permission boundaries.
 
-## Jobs To Be Done
-
-- "When I have an idea or important context, I want to capture it quickly before
-  I lose it."
-- "When I come back later, I want to find the right note even if I do not
-  remember the exact words."
-- "When my notes get messy, I want the app to help organize them without
-  rewriting my content."
-- "When I am working on something technical, I want notes, supporting images,
-  and tags in one place."
+---
 
 ## Core Value Proposition
 
-A private second brain for engineers that combines note-taking, lightweight
-asset storage, AI organization, and semantic retrieval in one focused product.
+A unified, developer-native knowledge vault combining:
+- **Instant capture** with multi-format imports and debounced autosave.
+- **AI-driven metadata** that organizes without destroying user intent.
+- **Granular sharing** with real-time role-based access control.
+- **Deep recall** through semantic vector search even when exact keywords are forgotten.
 
-## MVP Scope
+---
 
-- User authentication
-- Private per-user notes
-- Create, edit, and delete notes
-- Debounced autosave
-- Tags for organization and filtering
-- Inline BlockEditor image embeds
-- AI auto-organize for title, summary, and tags
-- Semantic search via embeddings
-- Light/dark theme support
-- Dynamic Open Graph images for notes
+## Functional Scope & Features
 
-## Primary User Flow
+### 1. Document Creation & Editing
+- **Block-Based Rich Text Editor**: Clean, responsive editing interface supporting headings, code blocks, lists, quotes, and inline images.
+- **Debounced Autosave**: Changes persist automatically with clear visual status indicators (`Saved`, `Saving...`, `Error`).
+- **Document Renaming**: Rename documents via a dedicated modal or context menu without losing document state.
+- **Document Deletion**: Safe deletion workflow with user confirmation.
 
-1. User lands on the homepage and understands the value proposition.
-2. User signs in or signs up.
-3. User enters the `/notes` workspace and sees their note library.
-4. User creates a new note with title, content, and optional tags.
-5. User is redirected into the note editor.
-6. User edits freely while the app auto-saves changes.
-7. User can add or remove tags and upload images directly inside the block editor.
-8. User can run `Auto-organize` to generate a cleaner title, summary, and tags.
-9. Later, the user finds notes either by keyword filters or semantic search with
-   `Cmd+K` / `Ctrl+K`.
+### 2. Multi-Format File Import & Export
+- **File Import Dialog**: Directly import files into new notes with automatic title detection and body extraction. Supported formats:
+  - Markdown (`.md`)
+  - Plain Text (`.txt`)
+  - Code & Config: Python (`.py`), JavaScript/TypeScript (`.js`, `.ts`, `.tsx`), JSON (`.json`), CSV (`.csv`), HTML (`.html`), CSS (`.css`)
+- **Document Export**: Download any note as standard Markdown (`.md`) with preserved formatting.
 
-## Key Features
+### 3. Document Sharing & Role-Based Permissions
+- **Granular Email Sharing**: Document owners can invite collaborators by email address.
+- **Permission Levels**:
+  - `viewer`: Read-only mode. Content editing, auto-organize, and deletion are disabled in the UI and enforced at the database level.
+  - `editor`: Can update note title, body, and tags.
+- **Owner Control**: Revoke collaborator access or update permissions anytime.
+- **"Shared with Me" Library Tab**: Dedicated tab listing notes shared with the active user, with permission badges (`Viewer` / `Editor`).
 
-### 1. Notes Workspace
+### 4. AI Auto-Organization
+- **One-Click Auto-Organize**: Analyzes note contents via OpenRouter LLMs.
+- Generates:
+  - High-signal technical title
+  - Structured executive summary
+  - Relevant classification tags
+- Updates note metadata non-destructively without overwriting the user's body text.
 
-A dedicated notes hub where users browse all notes, see recent activity, and
-filter by search query or tags.
+### 5. Semantic Vector Search
+- **Command Palette (`Cmd+K` / `Ctrl+K`)**: Global search dialog accessible from anywhere in the application.
+- **Vector Embeddings**: Generates 1536-dimensional embeddings (`text-embedding-3-small`) stored in PostgreSQL.
+- **Cosine Similarity Matching**: Finds relevant documents by conceptual meaning even when exact search terms differ.
+- **Keyword & Tag Filtering**: Fast client-side filtering by title, summary, and taxonomy tags.
 
-### 2. Rich Note Editing
+### 6. Asset & Image Management
+- **Inline Image Uploads**: Upload images directly into documents, stored in an InsForge storage bucket.
+- **File Validation**: Strict validation for allowed MIME types (`image/png`, `image/jpeg`, `image/webp`, `image/gif`) and file size limits (5MB max).
 
-Each note has a focused editor with title, body, metadata, autosave state, and
-deletion flow.
+### 7. Authentication & Security
+- **Per-User Isolation**: User accounts authenticated via InsForge Auth with JWT sessions.
+- **Row-Level Security (RLS)**: Enforces that users can only read or modify their own notes or notes explicitly shared with them.
 
-### 3. AI Auto-Organize
+---
 
-The app can analyze note content and generate:
+## Technical Architecture
 
-- A better title
-- A short summary
-- A small set of tags
+- **Frontend Framework**: Next.js 16 (App Router, Turbopack) + React 19 + TypeScript.
+- **Styling**: Tailwind CSS 3.4 with custom design tokens, dark/light theme support, and responsive layouts.
+- **Backend & Database**: InsForge BaaS (PostgreSQL + PostgREST).
+- **Storage**: InsForge S3-compatible Object Storage for image assets.
+- **AI Integrations**: OpenRouter API (`text-embedding-3-small` for vector embeddings, chat models for auto-organization).
+- **Core Database Entities**:
+  - `notes`: `id`, `user_id`, `title`, `content`, `summary`, `created_at`, `updated_at`
+  - `document_shares`: `id`, `document_id`, `shared_by_user_id`, `shared_with_email`, `permission` (`viewer` | `editor`), `created_at`
+  - `tags`: `id`, `name`, `user_id`
+  - `note_tags`: `note_id`, `tag_id`
+  - `note_embeddings`: `note_id`, `embedding` (vector)
 
-This improves organization without changing the underlying note content.
+---
 
-### 4. Semantic Search
+## Implementation Status
 
-Users can search notes by meaning rather than exact text using embeddings and
-vector search. This is one of the strongest differentiators in the product.
-
-### 5. Inline Image Embeds
-
-Users can upload and embed images directly inline within the BlockEditor canvas, giving notes a lightweight documentation or reference capability.
-
-### 6. Private User Data
-
-The app is designed as a private vault. Authentication and row-level data
-isolation are core to the product story.
-
-## Product Principles
-
-- Fast capture over heavy structure
-- AI should organize, not get in the way
-- Private by default
-- Search should work even when memory fails
-- Clean interface for technical users
-
-## What The Product Is Not
-
-- Not a team collaboration tool
-- Not a full documentation wiki
-- Not a project management app
-- Not a billing-enabled SaaS yet
-- Not a version-controlled notebook with history or restore
-
-## Functional Requirements
-
-- Users must be able to authenticate and access only their own notes.
-- Users must be able to create, edit, and delete notes.
-- Notes must support title, content, summary, tags, and images.
-- Notes must auto-save after edits.
-- Users must be able to filter notes by text and tags.
-- Users must be able to semantically search notes through a command palette.
-- Users must be able to run AI organization on sufficiently long notes.
-- Image uploads must validate file type and size.
-
-## Non-Functional Requirements
-
-- Editing should feel responsive and uninterrupted.
-- Search should feel fast enough for command-palette usage.
-- Data access should remain isolated per user.
-- AI responses should be structured and constrained.
-- The UI should work well in light and dark mode.
-
-## Success Metrics
-
-- Notes created per active user
-- Weekly returning users
-- Percentage of notes later revisited
-- Usage rate of AI auto-organize
-- Usage rate of semantic search
-- Search-to-click conversion rate
-- Average time from note creation to first meaningful edit
-- Low save failure rate
-
-## Target Technical Shape
-
-- Frontend: `Next.js` App Router + `React` + `TypeScript`
-- Backend: `InsForge`
-- Data model: `notes`, `tags`, `note_tags`, `note_images`, `note_embeddings`
-- AI: chat completion for organization, embeddings for search
-- Storage: note image bucket
-- Auth model: authenticated single-user vault
-
-Phase One: **Project setup**
-
-- create the app
-- install core dependencies
-- define folder structure
-- set basic design direction
+| Feature Area | Status | Notes |
+| :--- | :--- | :--- |
+| User Authentication | Shipped | Email/password login & registration via InsForge Auth |
+| Note CRUD & Autosave | Shipped | Full block editing with debounced state save |
+| Document Renaming | Shipped | Context menu & modal rename workflow |
+| Multi-Format Import | Shipped | Supports `.md`, `.txt`, `.json`, `.csv`, `.py`, `.ts`, etc. |
+| Markdown Export | Shipped | Download note content as `.md` |
+| Role-Based Sharing | Shipped | `viewer` and `editor` roles with RLS enforcement |
+| Shared With Me Tab | Shipped | Library view with role indicators |
+| AI Auto-Organize | Shipped | Generates title, summary, and tags |
+| Semantic Vector Search | Shipped | `Cmd+K` palette with cosine similarity search |
+| Inline Image Uploads | Shipped | Storage bucket integration with validation |
+| Dark / Light Theme | Shipped | System, dark, and light mode support |
