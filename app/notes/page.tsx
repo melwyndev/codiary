@@ -44,9 +44,11 @@ import {
 	Shield,
 	FileCode,
 	Printer,
+	Pencil,
 } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
 import { FileImportDialog } from "@/components/file-import-dialog";
+import { NoteRenameDialog } from "@/components/note-rename-dialog";
 import { exportNoteToMarkdown, exportNoteToPDF } from "@/lib/export-utils";
 import {
 	getNotesFromInsForge,
@@ -100,6 +102,9 @@ function NotesContent() {
 		y: number;
 		note: NoteItem | null;
 	}>({ visible: false, x: 0, y: 0, note: null });
+
+	// Rename Modal State
+	const [renameModalNote, setRenameModalNote] = useState<NoteItem | null>(null);
 
 	// Load notes on mount & user change directly from InsForge PostgreSQL DB
 	const refreshNotes = () => {
@@ -688,6 +693,19 @@ function NotesContent() {
 							onClick={() => {
 								const target = contextMenu.note;
 								setContextMenu({ visible: false, x: 0, y: 0, note: null });
+								if (target) setRenameModalNote(target);
+							}}
+							className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 transition-colors text-left font-bold"
+						>
+							<Pencil className="w-4 h-4 text-blue-500" />
+							<span>RENAME NOTE</span>
+						</button>
+
+						<button
+							type="button"
+							onClick={() => {
+								const target = contextMenu.note;
+								setContextMenu({ visible: false, x: 0, y: 0, note: null });
 								if (target) setShareModalNote(target);
 							}}
 							className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 transition-colors text-left font-bold"
@@ -759,6 +777,14 @@ function NotesContent() {
 					isOpen={isImportModalOpen}
 					onClose={() => setIsImportModalOpen(false)}
 					onSuccess={refreshNotes}
+				/>
+
+				{/* Rename Document Modal */}
+				<NoteRenameDialog
+					isOpen={Boolean(renameModalNote)}
+					note={renameModalNote}
+					onClose={() => setRenameModalNote(null)}
+					onRenamed={() => refreshNotes()}
 				/>
 			</div>
 		</div>
