@@ -54,16 +54,55 @@ Attach reference architecture diagrams, specifications, archives, or datasets di
 
 ## 🛠️ Getting Started
 
-### 1. Install Dependencies
+### Prerequisites
+- Node.js v18.18.0 or newer
+- pnpm (recommended), npm, or yarn
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/melwyndev/codiary.git
+cd codiary
+```
+
+### 2. Install Dependencies
 ```bash
 pnpm install
 # or npm install
 ```
 
-### 2. Run Locally
+### 3. Configure Environment Variables
+Create a `.env.local` file in the project root:
+```
+NEXT_PUBLIC_INSFORGE_BASE_URL=https://hxpct5r5.eu-central.insforge.app
+NEXT_PUBLIC_INSFORGE_ANON_KEY=anon_22aa1ba06252dde17f0efd8bea0322d0ca8e6283d1c1f3610bad07f7c7319560
+```
+
+### 4. Run Development Server
 ```bash
 pnpm dev
 # or npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 5. Production Build
+```bash
+pnpm build
+pnpm start
+```
+
+---
+
+## 🔑 Demo Credentials
+
+Two pre-configured test accounts are available for reviewing the sharing and collaboration features:
+
+- **User 1**: `user1@gmail.com` / `password1234`
+- **User 2**: `user2@gmail.com` / `password1234`
+
+---
+
+## 🔗 Live Deployment
+
+- **Live Product**: [https://codiary-jet.vercel.app/](https://codiary-jet.vercel.app/)
+- **GitHub Repository**: [https://github.com/melwyndev/codiary.git](https://github.com/melwyndev/codiary.git)
