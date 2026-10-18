@@ -111,7 +111,7 @@ function NotesContent() {
 		setNotesList(getNotes());
 		setIsFetchingNotes(false);
 		getNotesFromInsForge().then((list) => {
-			if (list && list.length > 0) {
+			if (list) {
 				setNotesList(list);
 			}
 		});

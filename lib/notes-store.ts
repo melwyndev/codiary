@@ -99,6 +99,18 @@ function saveNotesToLocalStorage(notes: NoteItem[]): void {
 	}
 }
 
+// Helper to ensure InsForge SDK client has the active JWT access token attached
+export function ensureClientToken(): void {
+	if (typeof window !== "undefined") {
+		try {
+			const storedToken = localStorage.getItem("codiary_auth_token");
+			if (storedToken) {
+				insforge.setAccessToken(storedToken);
+			}
+		} catch (e) {}
+	}
+}
+
 // In-memory cache for fast local UI interactions during active session
 let inMemoryNotes: NoteItem[] = [];
 
@@ -355,6 +367,7 @@ export async function fetchNoteSharesMapFromInsForge(): Promise<
  * Fetch all notes for current authenticated user directly from InsForge PostgreSQL.
  */
 export async function getNotesFromInsForge(): Promise<NoteItem[]> {
+	ensureClientToken();
 	try {
 		const [notesRes, noteTagsMap, noteSharesMap] = await Promise.all([
 			insforge.database.from("notes").select("*"),
@@ -402,7 +415,22 @@ export async function getNotesFromInsForge(): Promise<NoteItem[]> {
 				};
 			});
 
-			const ordered = applyCustomOrder(mapped);
+			// Preserve any pending notes or local notes not yet returned by the server
+			const serverIds = new Set(mapped.map((n) => n.id));
+			const pendingNotes: NoteItem[] = [];
+			for (const [id, pending] of pendingCreatedNotes.entries()) {
+				if (!serverIds.has(id)) {
+					pendingNotes.push(pending);
+				}
+			}
+			for (const localNote of inMemoryNotes) {
+				if (!serverIds.has(localNote.id) && !pendingNotes.some((p) => p.id === localNote.id)) {
+					pendingNotes.push(localNote);
+				}
+			}
+
+			const merged = [...pendingNotes, ...mapped];
+			const ordered = applyCustomOrder(merged);
 			inMemoryNotes = ordered;
 			saveNotesToLocalStorage(inMemoryNotes);
 			notifyRefreshNotes();
@@ -548,7 +576,22 @@ export async function createNoteInInsForge(
 	let activeUserId = userId;
 	let activeUserEmail = userEmail;
 	if (!activeUserId || !activeUserEmail) {
+		ensureClientToken();
 		try {
+			if (typeof window !== "undefined") {
+				const stored = localStorage.getItem("codiary_session_user_v1");
+				if (stored) {
+					const parsed = JSON.parse(stored);
+					if (!activeUserId && parsed?.id && isValidUUID(parsed.id)) {
+						activeUserId = parsed.id;
+						newNote.ownerId = activeUserId;
+					}
+					if (!activeUserEmail && parsed?.email) {
+						activeUserEmail = parsed.email;
+						newNote.ownerEmail = activeUserEmail;
+					}
+				}
+			}
 			const { data: userData } = await insforge.auth.getCurrentUser();
 			if (!activeUserId && userData?.user?.id && isValidUUID(userData.user.id)) {
 				activeUserId = userData.user.id;
@@ -577,14 +620,15 @@ export async function createNoteInInsForge(
 	}
 
 	try {
-		const { error } = await insforge.database.from("notes").insert([dbPayload]);
-		if (error && dbPayload.user_id) {
-			delete dbPayload.user_id;
-			await insforge.database.from("notes").insert([dbPayload]);
+		const { error } = await insforge.database.from("notes").upsert([dbPayload]);
+		if (error) {
+			console.warn("InsForge note DB upsert error:", error);
 		}
 		// Sync tags into public.tags and public.note_tags tables
 		const syncedTags = await syncNoteTagsInInsForge(noteId, tags, activeUserId);
 		newNote.tags = syncedTags;
+		saveNotesToLocalStorage(inMemoryNotes);
+		notifyRefreshNotes();
 	} catch (err) {
 		console.warn("InsForge note DB insert warning:", err);
 	}
@@ -636,6 +680,7 @@ export async function updateNoteInInsForge(
 		inMemoryNotes.unshift(updatedNote);
 	}
 	notifyRefreshNotes();
+	ensureClientToken();
 
 	let activeUserId: string | undefined;
 	try {
@@ -661,10 +706,6 @@ export async function updateNoteInInsForge(
 		dbPayload.attachments = sanitizedUpdates.attachments;
 	}
 
-	if (isValidUUID(activeUserId)) {
-		dbPayload.user_id = activeUserId;
-	}
-
 	if (isValidUUID(id)) {
 		try {
 			const { error } = await insforge.database
@@ -672,14 +713,13 @@ export async function updateNoteInInsForge(
 				.update(dbPayload)
 				.eq("id", id);
 			if (error) {
-				const insertPayload = { id, ...dbPayload };
-				const { error: insertErr } = await insforge.database
-					.from("notes")
-					.insert([insertPayload]);
-				if (insertErr && insertPayload.user_id) {
-					delete insertPayload.user_id;
-					await insforge.database.from("notes").insert([insertPayload]);
-				}
+				console.warn("InsForge note DB update error, attempting upsert:", error);
+				await insforge.database.from("notes").upsert([{
+					id,
+					...dbPayload,
+					...(isValidUUID(activeUserId) ? { user_id: activeUserId } : {}),
+					...(updatedNote.ownerEmail ? { owner_email: updatedNote.ownerEmail } : {}),
+				}]);
 			}
 			// Sync tags into public.tags and public.note_tags tables if tags were updated
 			if (sanitizedUpdates.tags !== undefined) {
@@ -690,6 +730,8 @@ export async function updateNoteInInsForge(
 				);
 				updatedNote.tags = syncedTags;
 			}
+			saveNotesToLocalStorage(inMemoryNotes);
+			notifyRefreshNotes();
 		} catch (err) {
 			console.warn("InsForge update note error:", err);
 		}
@@ -871,6 +913,12 @@ export async function shareNoteInInsForge(
 	// 2. Persist to InsForge DB if valid UUID
 	if (isValidUUID(noteId)) {
 		try {
+			let currentUserId: string | undefined;
+			try {
+				const { data: userData } = await insforge.auth.getCurrentUser();
+				if (userData?.user?.id) currentUserId = userData.user.id;
+			} catch {}
+
 			await insforge.database
 				.from("note_shares")
 				.delete()
@@ -881,6 +929,7 @@ export async function shareNoteInInsForge(
 				note_id: noteId,
 				shared_with_email: sanitizedEmail,
 				role,
+				...(currentUserId ? { shared_by_user_id: currentUserId } : {}),
 			}]);
 		} catch (err) {
 			console.warn("InsForge shareNote error:", err);

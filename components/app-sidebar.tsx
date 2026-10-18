@@ -13,7 +13,25 @@ import {
 } from "@/lib/notes-store";
 import { useSidebar } from "@/components/sidebar-context";
 import { useAuth } from "@/components/auth-provider";
-import { FileText, Pin, ChevronDown, MoreHorizontal, Plus, Trash2, Edit3, GripVertical, Users } from "lucide-react";
+import {
+	FileText,
+	Pin,
+	ChevronDown,
+	MoreHorizontal,
+	Plus,
+	Trash2,
+	Edit3,
+	GripVertical,
+	Users,
+	Pencil,
+	Share2,
+	FileCode,
+	Printer,
+} from "lucide-react";
+import { ShareDialog } from "@/components/share-dialog";
+import { NoteRenameDialog } from "@/components/note-rename-dialog";
+import { exportNoteToMarkdown, exportNoteToPDF } from "@/lib/export-utils";
+import { showToast } from "@/components/toast";
 
 interface AppSidebarProps {
 	/** Optional ID of the currently active note to highlight in the list */
@@ -46,15 +64,17 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 		note: NoteItem | null;
 	}>({ visible: false, x: 0, y: 0, note: null });
 
-	// Load from InsForge DB on mount if in-memory cache is empty
+	// Modals State
+	const [renameModalNote, setRenameModalNote] = useState<NoteItem | null>(null);
+	const [shareModalNote, setShareModalNote] = useState<NoteItem | null>(null);
+
+	// Load from InsForge DB on mount
 	useEffect(() => {
-		if (notesList.length === 0) {
-			getNotesFromInsForge().then((notes) => {
-				if (notes && notes.length > 0) {
-					setNotesList(notes);
-				}
-			});
-		}
+		getNotesFromInsForge().then((notes) => {
+			if (notes) {
+				setNotesList(notes);
+			}
+		});
 	}, []);
 
 	// Global notes store update listener
@@ -544,10 +564,67 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 					<button
 						type="button"
 						onClick={() => {
+							const target = contextMenu.note;
+							setContextMenu({ visible: false, x: 0, y: 0, note: null });
+							if (target) setRenameModalNote(target);
+						}}
+						className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 transition-colors text-left font-bold cursor-pointer"
+					>
+						<Pencil className="w-4 h-4 text-blue-500" />
+						<span>RENAME NOTE</span>
+					</button>
+
+					<button
+						type="button"
+						onClick={() => {
+							const target = contextMenu.note;
+							setContextMenu({ visible: false, x: 0, y: 0, note: null });
+							if (target) setShareModalNote(target);
+						}}
+						className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 transition-colors text-left font-bold cursor-pointer"
+					>
+						<Share2 className="w-4 h-4" />
+						<span>SHARE NOTE</span>
+					</button>
+
+					<div className="h-px bg-border/60 my-1" />
+
+					<button
+						type="button"
+						onClick={() => {
+							const target = contextMenu.note;
+							setContextMenu({ visible: false, x: 0, y: 0, note: null });
+							if (target) exportNoteToMarkdown(target);
+						}}
+						className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors text-left font-bold cursor-pointer"
+					>
+						<FileCode className="w-4 h-4" />
+						<span>EXPORT MARKDOWN (.MD)</span>
+					</button>
+
+					<button
+						type="button"
+						onClick={() => {
+							const target = contextMenu.note;
+							setContextMenu({ visible: false, x: 0, y: 0, note: null });
+							if (target) exportNoteToPDF(target);
+						}}
+						className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 transition-colors text-left font-bold cursor-pointer"
+					>
+						<Printer className="w-4 h-4" />
+						<span>EXPORT PDF (.PDF)</span>
+					</button>
+
+					<div className="h-px bg-border/60 my-1" />
+
+					<button
+						type="button"
+						onClick={() => {
 							const noteId = contextMenu.note?.id;
 							setContextMenu({ visible: false, x: 0, y: 0, note: null });
 							if (noteId) {
 								deleteNoteFromInsForge(noteId);
+								showToast("Deleted note");
 							}
 						}}
 						className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-destructive hover:bg-destructive/10 transition-colors text-left font-bold cursor-pointer"
@@ -557,6 +634,24 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 					</button>
 				</div>
 			)}
+
+			{/* Share Dialog */}
+			{shareModalNote && (
+				<ShareDialog
+					note={shareModalNote}
+					isOpen={Boolean(shareModalNote)}
+					onClose={() => setShareModalNote(null)}
+					onUpdate={() => setNotesList(getNotes())}
+				/>
+			)}
+
+			{/* Rename Dialog */}
+			<NoteRenameDialog
+				isOpen={Boolean(renameModalNote)}
+				note={renameModalNote}
+				onClose={() => setRenameModalNote(null)}
+				onRenamed={() => setNotesList(getNotes())}
+			/>
 		</>
 	);
 }

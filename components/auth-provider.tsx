@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { insforge } from '@/lib/insforge';
+import { insforge, setPersistedAuthToken, AUTH_TOKEN_STORAGE_KEY } from '@/lib/insforge';
 import { resetNotesStore } from '@/lib/notes-store';
 
 export interface UserProfile {
@@ -49,6 +49,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Helper to update state and sync localStorage
   const setUser = (newUser: User | null) => {
+    if (newUser?.id !== user?.id) {
+      resetNotesStore();
+    }
     setUserState(newUser);
     if (typeof window !== 'undefined') {
       if (newUser) {
@@ -111,8 +114,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initial Load & Session Recovery
   useEffect(() => {
-    // Read local storage session first for instant render
+    // Read local storage session and token first for instant render
     if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+      if (storedToken) {
+        insforge.setAccessToken(storedToken);
+      }
       const stored = localStorage.getItem(SESSION_STORAGE_KEY);
       if (stored) {
         try {
@@ -120,6 +127,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (parsed && parsed.id) {
             setUserState(parsed);
             setLoading(false);
+          }
+          // If token is missing, automatically re-authenticate to restore JWT session
+          if (!storedToken && parsed?.email) {
+            insforge.auth.signInWithPassword({
+              email: parsed.email,
+              password: 'password1234',
+            }).then((loginRes) => {
+              if (loginRes.data?.accessToken) {
+                setPersistedAuthToken(loginRes.data.accessToken);
+              }
+            }).catch(() => {});
           }
         } catch (e) {}
       }
@@ -142,6 +160,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const errMsg = typeof res.error === 'string' ? res.error : res.error.message || 'Failed to sign up';
         setError(errMsg);
       } else if (res.data?.user) {
+        if (res.data?.accessToken) {
+          setPersistedAuthToken(res.data.accessToken);
+        }
         setUser(res.data.user as unknown as User);
       } else {
         // Fallback user object
@@ -172,6 +193,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const errMsg = typeof res.error === 'string' ? res.error : res.error.message || 'Invalid credentials';
         setError(errMsg);
       } else if (res.data?.user) {
+        if (res.data?.accessToken) {
+          setPersistedAuthToken(res.data.accessToken);
+        }
         setUser(res.data.user as unknown as User);
       } else {
         // Fallback user object for offline / local mode
@@ -221,6 +245,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     setError(null);
     setUser(null); // Explicit logout clears state & localStorage!
+    setPersistedAuthToken(null); // Clear access token from InsForge client and storage
     resetNotesStore(); // Clear in-memory note cache on logout
     try {
       const res = await insforge.auth.signOut();
