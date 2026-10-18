@@ -4,6 +4,16 @@ Codiary is a developer notes workspace, code snippet repository, and architectur
 
 ---
 
+## 📐 Spec-Driven Development (SDD) Workflow
+
+This project was built following the **Spec-Driven Development (SDD)** paradigm (developed in partnership with JetBrains & DeepLearning.AI). Rather than unsupervised "vibe coding", the development was anchored in three permanent technical specifications:
+
+1. **[Project Constitution (`specs/constitution.md`)](file:///Users/melwyn/Github/codiary/specs/constitution.md)**: Defines immutable architectural rules, non-negotiables, technology stack constraints, and role permission matrices.
+2. **[System Specification (`specs/spec.md`)](file:///Users/melwyn/Github/codiary/specs/spec.md)**: Decouples the *WHAT and WHY* from the *HOW*, detailing exact specifications for all 4 assessment tasks (Block Editor, File Ingestion, Sharing/RBAC, and Dual Export).
+3. **[Feature Loops & Verification Log (`specs/tasks.md`)](file:///Users/melwyn/Github/codiary/specs/tasks.md)**: Documents each feature development loop through `Plan → Implement → Verify → Status: Completed`.
+
+---
+
 ## 📁 File Upload & Document Import Workflows
 
 Codiary supports two product-relevant file workflows designed specifically for developers and engineering teams:
