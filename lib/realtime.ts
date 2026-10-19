@@ -14,6 +14,7 @@ export interface NoteChangePayload {
   noteId: string;
   senderId: string;
   senderEmail: string;
+  clientSessionId?: string;
   title?: string;
   content?: string;
   tags?: string[];
@@ -22,6 +23,12 @@ export interface NoteChangePayload {
   isPinned?: boolean;
   updatedAt: string;
 }
+
+// Unique ephemeral browser tab identifier to reliably discard self-echoes
+export const CLIENT_SESSION_ID =
+  typeof window !== 'undefined'
+    ? `tab_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`
+    : 'server';
 
 // Collaborator color palette for dynamic avatar styling
 const COLLABORATOR_COLORS = [
@@ -117,6 +124,7 @@ export async function publishNoteChange(
     noteId,
     senderId: currentUser.id,
     senderEmail: currentUser.email || 'Anonymous',
+    clientSessionId: CLIENT_SESSION_ID,
     title: changes.title,
     content: changes.content,
     tags: changes.tags,
@@ -172,9 +180,12 @@ export function subscribeToNote(
     const payload = (msg?.payload || msg) as NoteChangePayload;
     if (!payload || !payload.noteId || payload.noteId !== noteId) return;
 
-    // Ignore changes sent by the current user
+    // Unconditionally ignore self-echoes from this exact browser tab session
+    if (payload.clientSessionId && payload.clientSessionId === CLIENT_SESSION_ID) return;
+
+    // Fallback: ignore changes sent by the current user if clientSessionId is absent
     const sender = payload.senderId || msg?.meta?.senderId;
-    if (sender && sender === currentUser.id) return;
+    if (!payload.clientSessionId && sender && sender === currentUser.id) return;
 
     // Record collaborator activity
     if (payload.senderId && payload.senderEmail) {

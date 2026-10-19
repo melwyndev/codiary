@@ -330,6 +330,27 @@ export async function syncNoteTagsInInsForge(
 	}
 }
 
+export function clearCsrfTokenCookie(): void {
+	if (typeof document !== "undefined") {
+		document.cookie = "insforge_csrf_token=; path=/; max-age=0; SameSite=Lax";
+	}
+}
+
+export function getCachedUserId(): string | undefined {
+	if (typeof window !== "undefined") {
+		try {
+			const stored = localStorage.getItem("codiary_auth_session_v1");
+			if (stored) {
+				const parsed = JSON.parse(stored);
+				if (parsed?.id && isValidUUID(parsed.id)) {
+					return parsed.id;
+				}
+			}
+		} catch {}
+	}
+	return undefined;
+}
+
 function notifyRefreshNotes(): void {
 	if (typeof window !== "undefined") {
 		window.dispatchEvent(new CustomEvent("refresh-notes"));
@@ -380,8 +401,22 @@ export async function getNotesFromInsForge(): Promise<NoteItem[]> {
 			fetchNoteSharesMapFromInsForge(),
 		]);
 
-		if (notesRes.error) {
-			console.warn("InsForge fetch notes warning:", notesRes.error);
+		let effectiveNotesRes = notesRes;
+		if (effectiveNotesRes.error) {
+			const errStr = String(effectiveNotesRes.error.message || (effectiveNotesRes.error as any).details || "");
+			if (errStr.includes("CSRF")) {
+				clearCsrfTokenCookie();
+				try {
+					const retryRes = await insforge.database.from("notes").select("*");
+					if (!retryRes.error && Array.isArray(retryRes.data)) {
+						effectiveNotesRes = retryRes;
+					}
+				} catch {}
+			}
+		}
+
+		if (effectiveNotesRes.error) {
+			console.warn("InsForge fetch notes warning:", effectiveNotesRes.error);
 			isFetchingNotesFromDB = false;
 			if (inMemoryNotes.length === 0) {
 				inMemoryNotes = loadNotesFromLocalStorage();
@@ -389,8 +424,8 @@ export async function getNotesFromInsForge(): Promise<NoteItem[]> {
 			return inMemoryNotes;
 		}
 
-		if (!notesRes.error && Array.isArray(notesRes.data)) {
-			const mapped: NoteItem[] = notesRes.data.map((row: any) => {
+		if (!effectiveNotesRes.error && Array.isArray(effectiveNotesRes.data)) {
+			const mapped: NoteItem[] = effectiveNotesRes.data.map((row: any) => {
 				const { summary, icon } = parseSummaryAndIcon(row.summary);
 				const relationalTags = noteTagsMap.get(row.id);
 				const tags =
@@ -480,12 +515,26 @@ export async function getNoteByIdFromInsForge(
 				fetchNoteSharesMapFromInsForge(),
 			]);
 
+			let effectiveNoteRes = noteRes;
+			if (effectiveNoteRes.error) {
+				const errStr = String(effectiveNoteRes.error.message || (effectiveNoteRes.error as any).details || "");
+				if (errStr.includes("CSRF")) {
+					clearCsrfTokenCookie();
+					try {
+						const retry = await insforge.database.from("notes").select("*").eq("id", id);
+						if (!retry.error && Array.isArray(retry.data)) {
+							effectiveNoteRes = retry;
+						}
+					} catch {}
+				}
+			}
+
 			if (
-				!noteRes.error &&
-				Array.isArray(noteRes.data) &&
-				noteRes.data.length > 0
+				!effectiveNoteRes.error &&
+				Array.isArray(effectiveNoteRes.data) &&
+				effectiveNoteRes.data.length > 0
 			) {
-				const data = noteRes.data[0];
+				const data = effectiveNoteRes.data[0];
 				const { summary, icon } = parseSummaryAndIcon(data.summary);
 				const relationalTags = noteTagsMap.get(data.id);
 				const tags =
@@ -698,13 +747,8 @@ export async function updateNoteInInsForge(
 	notifyRefreshNotes();
 	ensureClientToken();
 
-	let activeUserId: string | undefined;
-	try {
-		const { data: userData } = await insforge.auth.getCurrentUser();
-		if (userData?.user?.id && isValidUUID(userData.user.id)) {
-			activeUserId = userData.user.id;
-		}
-	} catch {}
+	// Synchronously lookup cached user ID to eliminate redundant remote network calls
+	const activeUserId: string | undefined = getCachedUserId();
 
 	const dbSummary = formatSummaryWithIcon(
 		updatedNote.summary,

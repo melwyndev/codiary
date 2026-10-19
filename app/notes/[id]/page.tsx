@@ -319,7 +319,7 @@ export default function NoteEditorPage({
     };
   }, [noteId, user]);
 
-  // 300ms Debounced Autosave to InsForge PostgreSQL DB
+  // 1000ms Debounced Autosave to InsForge PostgreSQL DB
   useEffect(() => {
     if (!note || isApplyingRemoteChangeRef.current) return;
 
@@ -353,13 +353,13 @@ export default function NoteEditorPage({
       } else {
         setSaveStatus('saved');
       }
-    }, 300);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [title, tags, content, isPinned, noteId, note]);
 
-  // Word & Reading Time Calculation
-  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+  // Word & Reading Time Calculation (Memoized for high typing performance)
+  const wordCount = React.useMemo(() => (content.trim() ? content.trim().split(/\s+/).length : 0), [content]);
   const charCount = content.length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
@@ -1217,7 +1217,7 @@ ${content}`;
 
               {/* CANVAS WRITING AREA */}
               <BlockEditor
-                initialContent={content}
+                initialContent={initialCached?.content || note?.content || ''}
                 remoteContent={remoteContent}
                 onChange={(newMarkdown) => {
                   setContent(newMarkdown);

@@ -84,10 +84,15 @@ export default function BlockEditor({
 	});
 
 	const isInitializedWithContentRef = useRef(false);
+	const hasTypedRef = useRef(false);
+	const lastLocalEditTimeRef = useRef<number>(0);
 	const lastLocalMarkdownRef = useRef<string>(initialContent || "");
 
 	useEffect(() => {
 		if (!editor) return;
+
+		// If user has already started typing, NEVER let initialContent overwrite the canvas
+		if (hasTypedRef.current) return;
 
 		// Load content whenever initialContent is available and we haven't loaded non-empty content yet
 		if (initialContent && initialContent.trim() !== "" && !isInitializedWithContentRef.current) {
@@ -96,9 +101,10 @@ export default function BlockEditor({
 			lastLocalMarkdownRef.current = initialContent;
 
 			async function loadContent() {
+				if (hasTypedRef.current) return;
 				try {
 					const blocks = await editor.tryParseMarkdownToBlocks(initialContent!);
-					if (blocks && blocks.length > 0) {
+					if (blocks && blocks.length > 0 && !hasTypedRef.current) {
 						editor.replaceBlocks(editor.document, blocks);
 						return;
 					}
@@ -106,7 +112,7 @@ export default function BlockEditor({
 
 				try {
 					const blocks = await editor.tryParseHTMLToBlocks(initialContent!);
-					if (blocks && blocks.length > 0) {
+					if (blocks && blocks.length > 0 && !hasTypedRef.current) {
 						editor.replaceBlocks(editor.document, blocks);
 					}
 				} catch {}
@@ -129,30 +135,82 @@ export default function BlockEditor({
 			return;
 		}
 
+		let cancelled = false;
+		let deferTimer: NodeJS.Timeout | null = null;
+
 		async function applyRemoteContent() {
+			// Don't interrupt user mid-keystroke if they typed locally in the last 800ms
+			const timeSinceLastLocalEdit = Date.now() - lastLocalEditTimeRef.current;
+			if (timeSinceLastLocalEdit < 800) {
+				deferTimer = setTimeout(() => {
+					if (!cancelled) {
+						applyRemoteContent();
+					}
+				}, 800 - timeSinceLastLocalEdit + 50);
+				return;
+			}
+
+			try {
+				const currentMarkdown = await editor.blocksToMarkdownLossy(editor.document);
+				if (cancelled || (remoteContent && currentMarkdown && remoteContent.trim() === currentMarkdown.trim())) {
+					lastLocalMarkdownRef.current = remoteContent || "";
+					return;
+				}
+			} catch {}
+
+			// Capture current cursor block to restore after remote sync
+			let cursorBlockIndex = -1;
+			try {
+				const cursor = editor.getTextCursorPosition();
+				if (cursor?.block) {
+					cursorBlockIndex = editor.document.findIndex((b) => b.id === cursor.block.id);
+				}
+			} catch {}
+
 			try {
 				const blocks = await editor.tryParseMarkdownToBlocks(remoteContent!);
-				if (blocks && blocks.length > 0) {
+				if (blocks && blocks.length > 0 && !cancelled) {
 					lastLocalMarkdownRef.current = remoteContent!;
 					editor.replaceBlocks(editor.document, blocks);
+					if (cursorBlockIndex >= 0 && cursorBlockIndex < editor.document.length) {
+						try {
+							editor.setTextCursorPosition(editor.document[cursorBlockIndex], "end");
+						} catch {}
+					}
 					return;
 				}
 			} catch {}
 
 			try {
 				const blocks = await editor.tryParseHTMLToBlocks(remoteContent!);
-				if (blocks && blocks.length > 0) {
+				if (blocks && blocks.length > 0 && !cancelled) {
 					lastLocalMarkdownRef.current = remoteContent!;
 					editor.replaceBlocks(editor.document, blocks);
+					if (cursorBlockIndex >= 0 && cursorBlockIndex < editor.document.length) {
+						try {
+							editor.setTextCursorPosition(editor.document[cursorBlockIndex], "end");
+						} catch {}
+					}
 				}
 			} catch {}
 		}
 
 		applyRemoteContent();
+
+		return () => {
+			cancelled = true;
+			if (deferTimer) clearTimeout(deferTimer);
+		};
 	}, [editor, remoteContent]);
 
-	const handleChange = async () => {
+	const changeDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+	const flushPendingChange = async () => {
 		if (!onChange || !editor || !isInitializedRef.current) return;
+		if (changeDebounceTimerRef.current) {
+			clearTimeout(changeDebounceTimerRef.current);
+			changeDebounceTimerRef.current = null;
+		}
 		try {
 			const markdown = await editor.blocksToMarkdownLossy(editor.document);
 			// Prevent premature emission of empty string if document previously had non-empty content
@@ -182,6 +240,30 @@ export default function BlockEditor({
 			}
 		}
 	};
+
+	const handleChange = () => {
+		if (!onChange || !editor || !isInitializedRef.current) return;
+		hasTypedRef.current = true;
+		lastLocalEditTimeRef.current = Date.now();
+		isInitializedWithContentRef.current = true;
+
+		if (changeDebounceTimerRef.current) {
+			clearTimeout(changeDebounceTimerRef.current);
+		}
+
+		changeDebounceTimerRef.current = setTimeout(() => {
+			flushPendingChange();
+		}, 150);
+	};
+
+	useEffect(() => {
+		return () => {
+			if (changeDebounceTimerRef.current) {
+				clearTimeout(changeDebounceTimerRef.current);
+				flushPendingChange();
+			}
+		};
+	}, []);
 
 	const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
 		const items = e.clipboardData?.items;
@@ -268,6 +350,7 @@ export default function BlockEditor({
 		<div
 			className={`blocknote-wrapper w-full ${className || ""}`}
 			onPasteCapture={handlePaste}
+			onBlurCapture={flushPendingChange}
 		>
 			<style>{`
         .blocknote-wrapper .bn-container,
