@@ -112,7 +112,8 @@ export function ensureClientToken(): void {
 }
 
 // In-memory cache for fast local UI interactions during active session
-let inMemoryNotes: NoteItem[] = [];
+let inMemoryNotes: NoteItem[] = loadNotesFromLocalStorage();
+let isFetchingNotesFromDB = false;
 
 export function generateUUID(): string {
 	if (
@@ -367,6 +368,10 @@ export async function fetchNoteSharesMapFromInsForge(): Promise<
  * Fetch all notes for current authenticated user directly from InsForge PostgreSQL.
  */
 export async function getNotesFromInsForge(): Promise<NoteItem[]> {
+	if (isFetchingNotesFromDB) {
+		return inMemoryNotes;
+	}
+	isFetchingNotesFromDB = true;
 	ensureClientToken();
 	try {
 		const [notesRes, noteTagsMap, noteSharesMap] = await Promise.all([
@@ -377,6 +382,11 @@ export async function getNotesFromInsForge(): Promise<NoteItem[]> {
 
 		if (notesRes.error) {
 			console.warn("InsForge fetch notes warning:", notesRes.error);
+			isFetchingNotesFromDB = false;
+			if (inMemoryNotes.length === 0) {
+				inMemoryNotes = loadNotesFromLocalStorage();
+			}
+			return inMemoryNotes;
 		}
 
 		if (!notesRes.error && Array.isArray(notesRes.data)) {
@@ -433,11 +443,17 @@ export async function getNotesFromInsForge(): Promise<NoteItem[]> {
 			const ordered = applyCustomOrder(merged);
 			inMemoryNotes = ordered;
 			saveNotesToLocalStorage(inMemoryNotes);
+			isFetchingNotesFromDB = false;
 			notifyRefreshNotes();
 			return ordered;
 		}
 	} catch (err) {
 		console.error("Error fetching notes from InsForge DB:", err);
+		if (inMemoryNotes.length === 0) {
+			inMemoryNotes = loadNotesFromLocalStorage();
+		}
+	} finally {
+		isFetchingNotesFromDB = false;
 	}
 	return inMemoryNotes;
 }
@@ -779,6 +795,9 @@ export async function syncNotesFromInsForge(): Promise<NoteItem[]> {
 }
 
 export function getNotes(): NoteItem[] {
+	if (inMemoryNotes.length === 0) {
+		inMemoryNotes = loadNotesFromLocalStorage();
+	}
 	return [...inMemoryNotes];
 }
 

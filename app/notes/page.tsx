@@ -106,22 +106,38 @@ function NotesContent() {
 	// Rename Modal State
 	const [renameModalNote, setRenameModalNote] = useState<NoteItem | null>(null);
 
-	// Load notes on mount & user change directly from InsForge PostgreSQL DB
+	// Pure local state update when notes store updates
+	const updateFromLocalStore = () => {
+		setNotesList(getNotes());
+	};
+
+	// Explicit manual reload (e.g. from user actions)
 	const refreshNotes = () => {
 		setNotesList(getNotes());
-		setIsFetchingNotes(false);
 		getNotesFromInsForge().then((list) => {
-			if (list) {
+			if (list && list.length > 0) {
 				setNotesList(list);
 			}
 		});
 	};
 
+	// Load notes on mount & user change directly from InsForge PostgreSQL DB
 	useEffect(() => {
-		refreshNotes();
-		window.addEventListener("refresh-notes", refreshNotes);
+		// 1. Immediately hydrate from memory/localStorage
+		setNotesList(getNotes());
+		setIsFetchingNotes(false);
+
+		// 2. Fetch fresh notes from InsForge once
+		getNotesFromInsForge().then((list) => {
+			if (list && list.length > 0) {
+				setNotesList(list);
+			}
+		});
+
+		// 3. Pure local state listener (no recursive network fetch)
+		window.addEventListener("refresh-notes", updateFromLocalStore);
 		return () => {
-			window.removeEventListener("refresh-notes", refreshNotes);
+			window.removeEventListener("refresh-notes", updateFromLocalStore);
 		};
 	}, [user]);
 
@@ -438,11 +454,10 @@ function NotesContent() {
 										<button
 											type="button"
 											onClick={() => setViewMode("grid")}
-											className={`h-14 px-3.5 rounded-full text-xs font-sans font-bold flex items-center gap-1.5 transition-all ${
-												viewMode === "grid"
+											className={`h-14 px-3.5 rounded-full text-xs font-sans font-bold flex items-center gap-1.5 transition-all ${viewMode === "grid"
 													? "bg-muted text-foreground border border-border shadow-sm font-black"
 													: "text-muted-foreground hover:text-foreground"
-											}`}
+												}`}
 											title="Grid View"
 										>
 											<LayoutGrid className="w-4 h-4" />
@@ -451,11 +466,10 @@ function NotesContent() {
 										<button
 											type="button"
 											onClick={() => setViewMode("list")}
-											className={`h-14 px-3.5 rounded-full text-xs font-sans font-bold flex items-center gap-1.5 transition-all ${
-												viewMode === "list"
+											className={`h-14 px-3.5 rounded-full text-xs font-sans font-bold flex items-center gap-1.5 transition-all ${viewMode === "list"
 													? "bg-muted text-foreground border border-border shadow-sm font-black"
 													: "text-muted-foreground hover:text-foreground"
-											}`}
+												}`}
 											title="List View"
 										>
 											<List className="w-4 h-4" />
@@ -493,11 +507,10 @@ function NotesContent() {
 									<button
 										type="button"
 										onClick={() => setSharingFilter("all")}
-										className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-											sharingFilter === "all"
+										className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${sharingFilter === "all"
 												? "bg-card text-foreground shadow-sm border border-border/80 font-black"
 												: "text-muted-foreground hover:text-foreground"
-										}`}
+											}`}
 									>
 										<FileText className="w-3.5 h-3.5" />
 										<span>All Notes</span>
@@ -509,11 +522,10 @@ function NotesContent() {
 									<button
 										type="button"
 										onClick={() => setSharingFilter("owned")}
-										className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-											sharingFilter === "owned"
+										className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${sharingFilter === "owned"
 												? "bg-card text-foreground shadow-sm border border-border/80 font-black"
 												: "text-muted-foreground hover:text-foreground"
-										}`}
+											}`}
 									>
 										<Shield className="w-3.5 h-3.5 text-amber-500" />
 										<span>My Notes</span>
@@ -525,11 +537,10 @@ function NotesContent() {
 									<button
 										type="button"
 										onClick={() => setSharingFilter("shared")}
-										className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-											sharingFilter === "shared"
+										className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${sharingFilter === "shared"
 												? "bg-card text-purple-600 dark:text-purple-400 shadow-sm border border-purple-500/30 font-black"
 												: "text-muted-foreground hover:text-foreground"
-										}`}
+											}`}
 									>
 										<Users className="w-3.5 h-3.5 text-purple-500" />
 										<span>Shared with Me</span>
@@ -555,19 +566,17 @@ function NotesContent() {
 												key={tag}
 												type="button"
 												onClick={() => toggleTagFilter(tag)}
-												className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-bold transition-all cursor-pointer border ${
-													isSelected
+												className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-bold transition-all cursor-pointer border ${isSelected
 														? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 shadow-xs"
 														: "bg-card border-border hover:bg-muted text-muted-foreground hover:text-foreground"
-												}`}
+													}`}
 											>
 												<span>#{tag}</span>
 												<span
-													className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-														isSelected
+													className={`px-1.5 py-0.2 rounded-full text-[10px] ${isSelected
 															? "bg-amber-500/30 text-amber-700 dark:text-amber-300 font-extrabold"
 															: "bg-muted text-muted-foreground/80"
-													}`}
+														}`}
 												>
 													{count}
 												</span>
@@ -808,9 +817,8 @@ function NotesContent() {
 					if (wasDraggingRef.current) return;
 					router.push(`/notes/${note.id}`);
 				}}
-				className={`p-6 bg-card border rounded-3xl shadow-sm hover:shadow-xl hover:border-foreground/30 hover:-translate-y-1 transition-all duration-300 cursor-grab active:cursor-grabbing group flex flex-col justify-between relative overflow-hidden space-y-4 ${
-					isDragging ? "opacity-40 scale-[0.98]" : "opacity-100"
-				} ${isDragOver ? "border-primary ring-2 ring-primary/40" : "border-border/80"}`}
+				className={`p-6 bg-card border rounded-3xl shadow-sm hover:shadow-xl hover:border-foreground/30 hover:-translate-y-1 transition-all duration-300 cursor-grab active:cursor-grabbing group flex flex-col justify-between relative overflow-hidden space-y-4 ${isDragging ? "opacity-40 scale-[0.98]" : "opacity-100"
+					} ${isDragOver ? "border-primary ring-2 ring-primary/40" : "border-border/80"}`}
 			>
 				{/* Top Hover Pastel Gradient Line */}
 				<div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#aac2ec] via-[#fae8b4] via-[#f5c6a5] to-[#b8d8be] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -872,11 +880,10 @@ function NotesContent() {
 									togglePinNote(note.id);
 									refreshNotes();
 								}}
-								className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-									note.isPinned
+								className={`p-1.5 rounded-lg border transition-all cursor-pointer ${note.isPinned
 										? "bg-amber-500/10 border-amber-500/30 text-amber-500 fill-current"
 										: "bg-muted/40 border-border/50 text-muted-foreground/60 hover:text-amber-500 hover:bg-muted"
-								}`}
+									}`}
 								title={note.isPinned ? "Unpin Note" : "Pin Note"}
 							>
 								<Pin
@@ -936,9 +943,8 @@ function NotesContent() {
 					if (wasDraggingRef.current) return;
 					router.push(`/notes/${note.id}`);
 				}}
-				className={`p-5 bg-card border rounded-2xl shadow-sm hover:shadow-md hover:border-foreground/30 transition-all duration-200 cursor-grab active:cursor-grabbing group flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden ${
-					isDragging ? "opacity-40 scale-[0.98]" : "opacity-100"
-				} ${isDragOver ? "border-primary ring-2 ring-primary/40" : "border-border/80"}`}
+				className={`p-5 bg-card border rounded-2xl shadow-sm hover:shadow-md hover:border-foreground/30 transition-all duration-200 cursor-grab active:cursor-grabbing group flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden ${isDragging ? "opacity-40 scale-[0.98]" : "opacity-100"
+					} ${isDragOver ? "border-primary ring-2 ring-primary/40" : "border-border/80"}`}
 			>
 				<div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-[#aac2ec] via-[#fae8b4] to-[#b8d8be] opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 

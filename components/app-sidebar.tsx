@@ -224,11 +224,10 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 
 			{/* Sidebar Panel */}
 			<aside
-				className={`fixed inset-y-14 lg:inset-y-0 left-0 z-30 w-72 h-[calc(100vh-3.5rem)] lg:h-full bg-card/95 backdrop-blur-md lg:bg-card/40 border-r border-border flex flex-col overflow-y-auto transition-all duration-300 ease-in-out shrink-0 p-5 space-y-6 ${
-					isSidebarOpen
+				className={`fixed inset-y-14 lg:inset-y-0 left-0 z-30 w-72 h-[calc(100vh-3.5rem)] lg:h-full bg-card/95 backdrop-blur-md lg:bg-card/40 border-r border-border flex flex-col overflow-y-auto transition-all duration-300 ease-in-out shrink-0 p-5 space-y-6 ${isSidebarOpen
 						? "translate-x-0 opacity-100 lg:w-72 lg:border-r"
 						: "-translate-x-full opacity-0 pointer-events-none lg:w-0 lg:border-r-0 lg:translate-x-0 lg:opacity-0 lg:pointer-events-none"
-				} lg:relative`}
+					} lg:relative`}
 			>
 				<div className="space-y-5">
 					{/* SECTION 1: RECENTS (Sorted automatically by last edited / updated) */}
@@ -241,9 +240,8 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 							>
 								<div className="flex items-center gap-1.5">
 									<ChevronDown
-										className={`w-3.5 h-3.5 transition-transform duration-200 ${
-											isRecentsOpen ? "" : "-rotate-90"
-										}`}
+										className={`w-3.5 h-3.5 transition-transform duration-200 ${isRecentsOpen ? "" : "-rotate-90"
+											}`}
 									/>
 									<span className="text-[10px] font-sans font-black uppercase tracking-wider">
 										Recents
@@ -258,21 +256,19 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 											key={`recent-${n.id}`}
 											onClick={(e) => handleNavigate(e, n.id)}
 											onContextMenu={(e) => handleContextMenu(e, n)}
-											className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
-												n.id === activeNoteId
+											className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${n.id === activeNoteId
 													? "bg-muted text-foreground font-black"
 													: "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-											}`}
+												}`}
 										>
 											{n.icon ? (
 												<span className="text-sm shrink-0">{n.icon}</span>
 											) : (
 												<FileText
-													className={`w-3.5 h-3.5 shrink-0 ${
-														n.id === activeNoteId
+													className={`w-3.5 h-3.5 shrink-0 ${n.id === activeNoteId
 															? "text-foreground"
 															: "text-muted-foreground/75"
-													}`}
+														}`}
 												/>
 											)}
 											<span className="truncate flex-1">{n.title}</span>
@@ -303,9 +299,8 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 							>
 								<div className="flex items-center gap-1.5">
 									<ChevronDown
-										className={`w-3.5 h-3.5 transition-transform duration-200 ${
-											isPinnedOpen ? "" : "-rotate-90"
-										}`}
+										className={`w-3.5 h-3.5 transition-transform duration-200 ${isPinnedOpen ? "" : "-rotate-90"
+											}`}
 									/>
 									<span className="text-[10px] font-sans font-black uppercase tracking-wider">
 										Pinned
@@ -328,30 +323,26 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 												onDragEnd={handleDragEnd}
 												onClick={(e) => handleNavigate(e, n.id)}
 												onContextMenu={(e) => handleContextMenu(e, n)}
-												className={`group relative flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-grab active:cursor-grabbing transition-all duration-200 select-none ${
-													n.id === activeNoteId
+												className={`group relative flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-grab active:cursor-grabbing transition-all duration-200 select-none ${n.id === activeNoteId
 														? "bg-muted text-foreground font-black"
 														: "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-												} ${
-													isDragging
+													} ${isDragging
 														? "opacity-40 scale-95 border border-amber-500/40 shadow-md"
 														: "opacity-100"
-												} ${
-													isDragOver
+													} ${isDragOver
 														? "border-t-2 border-amber-500 bg-amber-500/10"
 														: ""
-												}`}
+													}`}
 											>
 												<GripVertical className="w-3 h-3 text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
 												{n.icon ? (
 													<span className="text-sm shrink-0">{n.icon}</span>
 												) : (
 													<FileText
-														className={`w-3.5 h-3.5 shrink-0 ${
-															n.id === activeNoteId
+														className={`w-3.5 h-3.5 shrink-0 ${n.id === activeNoteId
 																? "text-foreground"
 																: "text-muted-foreground/75"
-														}`}
+															}`}
 													/>
 												)}
 												<span className="truncate flex-1">{n.title}</span>
@@ -384,9 +375,8 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 							>
 								<div className="flex items-center gap-1.5">
 									<ChevronDown
-										className={`w-3.5 h-3.5 transition-transform duration-200 ${
-											isSharedOpen ? "" : "-rotate-90"
-										}`}
+										className={`w-3.5 h-3.5 transition-transform duration-200 ${isSharedOpen ? "" : "-rotate-90"
+											}`}
 									/>
 									<span className="text-[10px] font-sans font-black uppercase tracking-wider flex items-center gap-1.5">
 										<Users className="w-3 h-3 text-purple-500" />
@@ -405,11 +395,10 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 											key={`shared-${n.id}`}
 											onClick={(e) => handleNavigate(e, n.id)}
 											onContextMenu={(e) => handleContextMenu(e, n)}
-											className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
-												n.id === activeNoteId
+											className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${n.id === activeNoteId
 													? "bg-purple-500/15 text-purple-700 dark:text-purple-300 font-black"
 													: "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-											}`}
+												}`}
 										>
 											{n.icon ? (
 												<span className="text-sm shrink-0">{n.icon}</span>
@@ -436,9 +425,8 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 						>
 							<div className="flex items-center gap-1.5">
 								<ChevronDown
-									className={`w-3.5 h-3.5 transition-transform duration-200 ${
-										isAllNotesOpen ? "" : "-rotate-90"
-									}`}
+									className={`w-3.5 h-3.5 transition-transform duration-200 ${isAllNotesOpen ? "" : "-rotate-90"
+										}`}
 								/>
 								<span className="text-[10px] font-sans font-black uppercase tracking-wider">
 									All Notes
@@ -477,30 +465,26 @@ export function AppSidebar({ activeNoteId }: AppSidebarProps) {
 													onDragEnd={handleDragEnd}
 													onClick={(e) => handleNavigate(e, n.id)}
 													onContextMenu={(e) => handleContextMenu(e, n)}
-													className={`group relative flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-grab active:cursor-grabbing transition-all duration-200 select-none ${
-														n.id === activeNoteId
+													className={`group relative flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-grab active:cursor-grabbing transition-all duration-200 select-none ${n.id === activeNoteId
 															? "bg-muted text-foreground font-black"
 															: "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-													} ${
-														isDragging
+														} ${isDragging
 															? "opacity-40 scale-95 border border-amber-500/40 shadow-md"
 															: "opacity-100"
-													} ${
-														isDragOver
+														} ${isDragOver
 															? "border-t-2 border-amber-500 bg-amber-500/10"
 															: ""
-													}`}
+														}`}
 												>
 													<GripVertical className="w-3 h-3 text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
 													{n.icon ? (
 														<span className="text-sm shrink-0">{n.icon}</span>
 													) : (
 														<FileText
-															className={`w-3.5 h-3.5 shrink-0 ${
-																n.id === activeNoteId
+															className={`w-3.5 h-3.5 shrink-0 ${n.id === activeNoteId
 																	? "text-foreground"
 																	: "text-muted-foreground/75"
-															}`}
+																}`}
 														/>
 													)}
 													<span className="truncate flex-1">{n.title}</span>

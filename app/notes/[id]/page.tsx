@@ -66,6 +66,7 @@ import {
   Printer,
   ChevronDown,
   FileCode,
+  Wifi,
 } from 'lucide-react';
 import { exportNoteToPDF } from '@/lib/export-utils';
 import {
@@ -84,6 +85,12 @@ import {
   NoteAttachment,
 } from '@/lib/notes-store';
 import { ShareDialog } from '@/components/share-dialog';
+import {
+  subscribeToNote,
+  broadcastNoteChangeDebounced,
+  Collaborator,
+  NoteChangePayload,
+} from '@/lib/realtime';
 
 interface SlashMenuItem {
   id: string;
@@ -147,6 +154,13 @@ export default function NoteEditorPage({
   const [showShareModal, setShowShareModal] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
 
+  // Realtime live changes & collaborators presence state
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [remoteContent, setRemoteContent] = useState<string | undefined>(undefined);
+  const [remoteSyncNotice, setRemoteSyncNotice] = useState<string | null>(null);
+  const isApplyingRemoteChangeRef = useRef(false);
+  const noticeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   // File Attachments State
   const [attachments, setAttachments] = useState<NoteAttachment[]>(() => initialCached?.attachments || []);
   const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
@@ -171,7 +185,11 @@ export default function NoteEditorPage({
     try {
       const newAttachment = await uploadNoteAttachmentToInsForge(noteId, file);
       if (newAttachment) {
-        setAttachments((prev) => [...prev, newAttachment]);
+        const updated = [...attachments, newAttachment];
+        setAttachments(updated);
+        if (!isViewer && user?.id) {
+          broadcastNoteChangeDebounced(noteId, { attachments: updated }, { id: user.id, email: user.email });
+        }
         showToast(`Attached "${file.name}" to note`);
       }
     } catch (err: any) {
@@ -188,6 +206,9 @@ export default function NoteEditorPage({
     try {
       const updated = await removeNoteAttachmentFromInsForge(noteId, attachmentId);
       setAttachments(updated);
+      if (!isViewer && user?.id) {
+        broadcastNoteChangeDebounced(noteId, { attachments: updated }, { id: user.id, email: user.email });
+      }
       showToast('Removed attachment');
     } catch (err) {
       showToast('Failed to remove attachment', 'error');
@@ -253,9 +274,54 @@ export default function NoteEditorPage({
     };
   }, [noteId]);
 
+  // Subscribe to InsForge Realtime Channel for Live Document Collaboration
+  useEffect(() => {
+    if (!noteId || !user?.id) return;
+
+    const unsubscribe = subscribeToNote(
+      noteId,
+      {
+        id: user.id,
+        email: user.email || undefined,
+        name: (user as any).user_metadata?.full_name || user.email?.split('@')[0],
+      },
+      {
+        onRemoteChange: (payload: NoteChangePayload) => {
+          isApplyingRemoteChangeRef.current = true;
+          if (payload.title !== undefined) setTitle(payload.title);
+          if (payload.icon !== undefined) setIcon(payload.icon);
+          if (payload.tags !== undefined) setTags(payload.tags);
+          if (payload.isPinned !== undefined) setIsPinned(payload.isPinned);
+          if (payload.attachments !== undefined) setAttachments(payload.attachments);
+          if (payload.content !== undefined) {
+            setContent(payload.content);
+            setRemoteContent(payload.content);
+          }
+          if (payload.updatedAt) setLastSavedTime(payload.updatedAt);
+
+          setRemoteSyncNotice(`${payload.senderEmail} updated live`);
+          if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
+          noticeTimerRef.current = setTimeout(() => setRemoteSyncNotice(null), 3500);
+
+          setTimeout(() => {
+            isApplyingRemoteChangeRef.current = false;
+          }, 600);
+        },
+        onPresenceChange: (activeList) => {
+          setCollaborators(activeList);
+        },
+      }
+    );
+
+    return () => {
+      if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
+      unsubscribe();
+    };
+  }, [noteId, user]);
+
   // 300ms Debounced Autosave to InsForge PostgreSQL DB
   useEffect(() => {
-    if (!note) return;
+    if (!note || isApplyingRemoteChangeRef.current) return;
 
     const savedTitle = title.trim() ? title : 'Untitled Note';
 
@@ -302,6 +368,9 @@ export default function NoteEditorPage({
     const nextPinState = !isPinned;
     setIsPinned(nextPinState);
     togglePinNote(noteId);
+    if (!isViewer && user?.id) {
+      broadcastNoteChangeDebounced(noteId, { isPinned: nextPinState }, { id: user.id, email: user.email });
+    }
   };
 
   // Copy Content Action
@@ -494,12 +563,19 @@ ${content}`;
       setTags(updated);
       setNewTagInput('');
       setShowAddTag(false);
+      if (!isViewer && user?.id) {
+        broadcastNoteChangeDebounced(noteId, { tags: updated }, { id: user.id, email: user.email });
+      }
       showToast(`Added #${trimmed} tag`);
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter((t) => t !== tagToRemove));
+    const updated = tags.filter((t) => t !== tagToRemove);
+    setTags(updated);
+    if (!isViewer && user?.id) {
+      broadcastNoteChangeDebounced(noteId, { tags: updated }, { id: user.id, email: user.email });
+    }
   };
 
   // AI Auto-Organize Trigger
@@ -655,15 +731,56 @@ ${content}`;
 
             {/* Actions */}
             <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Realtime Live Collaborators Presence */}
+              {collaborators.length > 0 && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/25 rounded-full text-xs font-sans">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hidden sm:inline">
+                    Live ({collaborators.length})
+                  </span>
+                  <div className="flex items-center -space-x-1.5 ml-0.5">
+                    {collaborators.slice(0, 4).map((c) => (
+                      <div
+                        key={c.userId}
+                        className="relative group cursor-pointer"
+                        title={`${c.email} (${c.userId === user?.id ? 'You' : 'Viewing now'})`}
+                      >
+                        <div
+                          className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-xs border border-background select-none uppercase"
+                          style={{ backgroundColor: c.color }}
+                        >
+                          {c.email.substring(0, 1)}
+                        </div>
+                      </div>
+                    ))}
+                    {collaborators.length > 4 && (
+                      <div className="w-5 h-5 rounded-full bg-muted text-[9px] font-bold text-muted-foreground flex items-center justify-center border border-background">
+                        +{collaborators.length - 4}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Live Remote Stream Notification */}
+              {remoteSyncNotice && (
+                <div className="hidden lg:flex items-center gap-1 px-2.5 py-1 bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 rounded-full text-[11px] font-semibold animate-pulse">
+                  <Wifi className="w-3 h-3 text-blue-500" />
+                  <span>{remoteSyncNotice}</span>
+                </div>
+              )}
+
               {/* Ownership Status Pill */}
               <div
-                className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
-                  permission.isOwner
+                className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${permission.isOwner
                     ? 'bg-muted/80 border-border text-foreground'
                     : isViewer
-                    ? 'bg-purple-500/10 border-purple-500/25 text-purple-600 dark:text-purple-400'
-                    : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400'
-                }`}
+                      ? 'bg-purple-500/10 border-purple-500/25 text-purple-600 dark:text-purple-400'
+                      : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400'
+                  }`}
               >
                 {permission.isOwner ? (
                   <>
@@ -854,10 +971,12 @@ ${content}`;
                         onClick={() => {
                           setIcon(emoji);
                           setShowIconPicker(false);
+                          if (!isViewer && user?.id) {
+                            broadcastNoteChangeDebounced(noteId, { icon: emoji }, { id: user.id, email: user.email });
+                          }
                         }}
-                        className={`text-xl p-1.5 rounded-xl hover:bg-muted transition-transform hover:scale-125 ${
-                          icon === emoji ? 'bg-muted ring-2 ring-primary/40' : ''
-                        }`}
+                        className={`text-xl p-1.5 rounded-xl hover:bg-muted transition-transform hover:scale-125 ${icon === emoji ? 'bg-muted ring-2 ring-primary/40' : ''
+                          }`}
                       >
                         {emoji}
                       </button>
@@ -869,6 +988,9 @@ ${content}`;
                       onClick={() => {
                         setIcon(null);
                         setShowIconPicker(false);
+                        if (!isViewer && user?.id) {
+                          broadcastNoteChangeDebounced(noteId, { icon: null }, { id: user.id, email: user.email });
+                        }
                       }}
                       className="w-full text-center text-xs font-semibold text-destructive hover:bg-destructive/10 py-1.5 rounded-xl transition-colors mt-1"
                     >
@@ -894,7 +1016,14 @@ ${content}`;
               <textarea
                 value={title}
                 readOnly={isViewer}
-                onChange={(e) => !isViewer && setTitle(e.target.value)}
+                onChange={(e) => {
+                  if (isViewer) return;
+                  const newTitle = e.target.value;
+                  setTitle(newTitle);
+                  if (user?.id) {
+                    broadcastNoteChangeDebounced(noteId, { title: newTitle }, { id: user.id, email: user.email });
+                  }
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -904,13 +1033,15 @@ ${content}`;
                 onBlur={() => {
                   if (!title.trim()) {
                     setTitle('Untitled Note');
+                    if (user?.id) {
+                      broadcastNoteChangeDebounced(noteId, { title: 'Untitled Note' }, { id: user.id, email: user.email });
+                    }
                   }
                 }}
                 placeholder="Untitled"
                 rows={1}
-                className={`w-full bg-transparent border-none focus:outline-none text-4xl sm:text-5xl font-black tracking-tight text-foreground placeholder:text-muted-foreground/30 resize-none overflow-hidden leading-tight font-sans ${
-                  isViewer ? 'cursor-default' : ''
-                }`}
+                className={`w-full bg-transparent border-none focus:outline-none text-4xl sm:text-5xl font-black tracking-tight text-foreground placeholder:text-muted-foreground/30 resize-none overflow-hidden leading-tight font-sans ${isViewer ? 'cursor-default' : ''
+                  }`}
               />
             </div>
 
@@ -1064,11 +1195,10 @@ ${content}`;
                         type="button"
                         onClick={() => insertFormatting(item.snippet)}
                         onMouseEnter={() => setSelectedSlashIndex(idx)}
-                        className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-start gap-3 ${
-                          selectedSlashIndex === idx
+                        className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-start gap-3 ${selectedSlashIndex === idx
                             ? 'bg-muted text-foreground font-bold shadow-2xs'
                             : 'hover:bg-muted/60 text-muted-foreground'
-                        }`}
+                          }`}
                       >
                         <div className="p-1.5 bg-background border border-border/80 rounded-lg shrink-0 mt-0.5">
                           {item.icon}
@@ -1088,7 +1218,13 @@ ${content}`;
               {/* CANVAS WRITING AREA */}
               <BlockEditor
                 initialContent={content}
-                onChange={setContent}
+                remoteContent={remoteContent}
+                onChange={(newMarkdown) => {
+                  setContent(newMarkdown);
+                  if (!isViewer && user?.id) {
+                    broadcastNoteChangeDebounced(noteId, { content: newMarkdown }, { id: user.id, email: user.email });
+                  }
+                }}
                 editable={!isViewer}
                 className="min-h-[460px]"
               />

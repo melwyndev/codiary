@@ -19,6 +19,7 @@ const ENABLE_VIDEO_AUDIO = false; // Set to true when scaling up infrastructure
 
 interface BlockEditorProps {
 	initialContent?: string;
+	remoteContent?: string;
 	onChange?: (content: string) => void;
 	className?: string;
 	editable?: boolean;
@@ -26,6 +27,7 @@ interface BlockEditorProps {
 
 export default function BlockEditor({
 	initialContent,
+	remoteContent,
 	onChange,
 	className,
 	editable = true,
@@ -81,47 +83,99 @@ export default function BlockEditor({
 		},
 	});
 
-	useEffect(() => {
-		if (!editor || isInitializedRef.current) return;
+	const isInitializedWithContentRef = useRef(false);
+	const lastLocalMarkdownRef = useRef<string>(initialContent || "");
 
-		if (initialContent && initialContent.trim() !== "") {
+	useEffect(() => {
+		if (!editor) return;
+
+		// Load content whenever initialContent is available and we haven't loaded non-empty content yet
+		if (initialContent && initialContent.trim() !== "" && !isInitializedWithContentRef.current) {
+			isInitializedWithContentRef.current = true;
 			isInitializedRef.current = true;
+			lastLocalMarkdownRef.current = initialContent;
+
 			async function loadContent() {
 				try {
-					// Try parsing Markdown first
 					const blocks = await editor.tryParseMarkdownToBlocks(initialContent!);
 					if (blocks && blocks.length > 0) {
 						editor.replaceBlocks(editor.document, blocks);
 						return;
 					}
-				} catch {
-					// Fallback to HTML
-				}
+				} catch {}
 
 				try {
 					const blocks = await editor.tryParseHTMLToBlocks(initialContent!);
 					if (blocks && blocks.length > 0) {
 						editor.replaceBlocks(editor.document, blocks);
 					}
-				} catch {
-					// Ignore parse errors
-				}
+				} catch {}
 			}
 
 			loadContent();
-		} else {
+		} else if (!isInitializedRef.current && initialContent !== undefined) {
 			isInitializedRef.current = true;
 		}
 	}, [editor, initialContent]);
 
+	// Listen for remote real-time content changes from other collaborators
+	useEffect(() => {
+		if (
+			!editor ||
+			remoteContent === undefined ||
+			remoteContent === null ||
+			remoteContent === lastLocalMarkdownRef.current
+		) {
+			return;
+		}
+
+		async function applyRemoteContent() {
+			try {
+				const blocks = await editor.tryParseMarkdownToBlocks(remoteContent!);
+				if (blocks && blocks.length > 0) {
+					lastLocalMarkdownRef.current = remoteContent!;
+					editor.replaceBlocks(editor.document, blocks);
+					return;
+				}
+			} catch {}
+
+			try {
+				const blocks = await editor.tryParseHTMLToBlocks(remoteContent!);
+				if (blocks && blocks.length > 0) {
+					lastLocalMarkdownRef.current = remoteContent!;
+					editor.replaceBlocks(editor.document, blocks);
+				}
+			} catch {}
+		}
+
+		applyRemoteContent();
+	}, [editor, remoteContent]);
+
 	const handleChange = async () => {
-		if (!onChange || !editor) return;
+		if (!onChange || !editor || !isInitializedRef.current) return;
 		try {
 			const markdown = await editor.blocksToMarkdownLossy(editor.document);
+			// Prevent premature emission of empty string if document previously had non-empty content
+			if (
+				lastLocalMarkdownRef.current &&
+				lastLocalMarkdownRef.current.trim() !== "" &&
+				(!markdown || markdown.trim() === "")
+			) {
+				return;
+			}
+			lastLocalMarkdownRef.current = markdown;
 			onChange(markdown);
 		} catch {
 			try {
 				const html = await editor.blocksToHTMLLossy(editor.document);
+				if (
+					lastLocalMarkdownRef.current &&
+					lastLocalMarkdownRef.current.trim() !== "" &&
+					(!html || html.trim() === "")
+				) {
+					return;
+				}
+				lastLocalMarkdownRef.current = html;
 				onChange(html);
 			} catch {
 				// Ignore conversion errors
@@ -230,9 +284,8 @@ export default function BlockEditor({
           overflow-y: auto !important;
         }
 
-        ${
-					!ENABLE_VIDEO_AUDIO
-						? `
+        ${!ENABLE_VIDEO_AUDIO
+					? `
         /* Hide Video, Audio, and File embed items from slash menu and popups */
         .bn-slash-menu-item[data-item-type="video"],
         .bn-slash-menu-item[data-item-type="audio"],
@@ -246,7 +299,7 @@ export default function BlockEditor({
           display: none !important;
         }
         `
-						: ""
+					: ""
 				}
       `}</style>
 			<BlockNoteView
