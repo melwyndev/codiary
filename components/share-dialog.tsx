@@ -132,7 +132,7 @@ export function ShareDialog({ note, isOpen, onClose, onUpdate }: ShareDialogProp
           <div className="flex flex-col sm:flex-row gap-2">
             <Input
               type="email"
-              placeholder="teammate@codiary.dev"
+              placeholder="collaborator@example.com"
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
               className="flex-1 text-sm rounded-xl h-10"

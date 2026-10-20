@@ -27,7 +27,7 @@ export function Footer() {
                 <ul className="space-y-2.5 text-xs font-bold uppercase tracking-widest text-neutral-600 dark:text-neutral-300">
                   <li><a href="#features" className="hover:text-neutral-950 dark:hover:text-white transition-colors">Workspace Features</a></li>
                   <li><a href="#" className="hover:text-neutral-950 dark:hover:text-white transition-colors">Documentation</a></li>
-                  <li><a href="#" className="hover:text-neutral-950 dark:hover:text-white transition-colors">CLI reference</a></li>
+                  <li><a href="#" className="hover:text-neutral-950 dark:hover:text-white transition-colors">Quick Guides</a></li>
                 </ul>
               </div>
               <div className="space-y-3">
@@ -58,7 +58,7 @@ export function Footer() {
         <div className="md:col-span-6 border-t-[0.5px] md:border-t-0 md:border-l-[0.5px] border-neutral-900 dark:border-white/20 relative min-h-[350px] overflow-hidden">
           <Image
             src="/footer_workspace.png"
-            alt="Minimalist Developer Workspace Setup"
+            alt="Minimalist Desk & Workspace Setup"
             fill
             className="object-cover object-center dark:brightness-90 grayscale-[60%] hover:grayscale-0 transition-all duration-500"
           />

@@ -14,7 +14,7 @@ export function Features() {
       title: "Private Sandbox",
       numberColor: "text-[#5c7ba8] dark:text-[#aac2ec]",
       icon: <IconShieldLock className="size-4 text-[#5c7ba8] dark:text-[#aac2ec]" />,
-      summary: "Local-first vault architecture with zero analytics tracking, ensuring your code database schemas and notes remain your private asset.",
+      summary: "Local-first vault architecture with zero analytics tracking, ensuring your thoughts, documents, and notes remain your private asset.",
       code: `// codiary.vault.config.json
 {
   "storage": "local_sqlite_db",
@@ -28,7 +28,7 @@ export function Features() {
       title: "Debounced Autosave",
       numberColor: "text-[#bca462] dark:text-[#fae8b4]",
       icon: <IconRefresh className="size-4 text-[#bca462] dark:text-[#fae8b4]" />,
-      summary: "Focus entirely on writing. All terminal scribbles, logs, and markdown files auto-save instantly to prevent working data loss.",
+      summary: "Focus entirely on writing. All your drafts, ideas, and markdown notes auto-save instantly to prevent working data loss.",
       code: `// Autosave engine
 useDebouncedSave({
   delayMs: 300,
@@ -41,11 +41,11 @@ useDebouncedSave({
       title: "AI Auto-Organize",
       numberColor: "text-[#b06060] dark:text-[#eba7a7]",
       icon: <IconCode className="size-4 text-[#b06060] dark:text-[#eba7a7]" />,
-      summary: "Clean messy drafts automatically. The local AI formats code snippets, generates summaries, and categorizes metadata files.",
+      summary: "Clean messy drafts automatically. The AI structures your writing, generates summaries, and categorizes note metadata.",
       code: `// Embedded vector indexing
 const embed = await localAI.vectorize({
   content: currentNote,
-  tags: ["architecture", "postgres", "nextjs"]
+  tags: ["ideas", "journal", "projects"]
 })`
     }
   ]

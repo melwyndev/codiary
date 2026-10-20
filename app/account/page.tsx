@@ -142,7 +142,7 @@ export default function AccountPage() {
                 <Input
                   id="nickname"
                   type="text"
-                  placeholder="e.g. Alex Developer"
+                  placeholder="e.g. Alex Morgan"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   className="bg-background border-border text-foreground input-standard"
@@ -156,7 +156,7 @@ export default function AccountPage() {
                 <Input
                   id="bio"
                   type="text"
-                  placeholder="Full-stack engineer building AI tools"
+                  placeholder="Writer, thinker, and knowledge enthusiast"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   className="bg-background border-border text-foreground input-standard"

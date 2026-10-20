@@ -97,7 +97,7 @@ export function NoteRenameDialog({
             <div>
               <h2 className="font-bold text-base text-foreground">Rename Document</h2>
               <p className="text-xs text-muted-foreground">
-                Update the title of this developer note
+                Update the title of this note
               </p>
             </div>
           </div>

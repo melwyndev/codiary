@@ -121,8 +121,8 @@ export function LoginForm({ defaultMode }: { defaultMode?: 'signin' | 'signup' }
           {mode === 'verify' && 'Verify Your Email'}
         </h1>
         <p className="text-xs text-muted-foreground">
-          {mode === 'signin' && 'Access your private developer archive & notes'}
-          {mode === 'signup' && 'Start capturing architectures, code snippets & debug logs'}
+          {mode === 'signin' && 'Access your private archive & notes'}
+          {mode === 'signup' && 'Start capturing ideas, daily notes & personal projects'}
           {mode === 'verify' && `We sent a 6-digit verification code to ${email || 'your email'}`}
         </p>
       </div>

@@ -35,7 +35,7 @@ export function Hero() {
             A Note Vault for What’s Ahead.
           </h1>
           <p className="text-base md:text-lg font-normal text-neutral-700 dark:text-neutral-300 max-w-lg leading-relaxed pt-1">
-            Codiary is a private, AI-powered notes archive built for software developers to capture ideas, document architectures, track debug flows, and retrieve them via semantic vector search.
+            Codiary is a private, AI-powered notes archive built to capture ideas, organize thoughts, document projects, and retrieve them via semantic search.
           </p>
           <div className="pt-2">
             <Button

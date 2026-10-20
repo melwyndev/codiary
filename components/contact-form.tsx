@@ -92,7 +92,7 @@ export function ContactForm() {
 					<h2 className="text-4xl md:text-6xl lg:text-7xl font-sans font-black tracking-tight leading-[1.02] text-neutral-950 dark:text-white">
 						Ready to Begin?
 						<br />
-						Your Engineering Note Vault Starts Here.
+						Your Private Note Vault Starts Here.
 					</h2>
 
 					<div className="w-full max-w-sm pt-4 md:pt-6">
@@ -128,7 +128,7 @@ export function ContactForm() {
 										htmlFor="dev-name"
 										className="pl-2 text-xs font-bold uppercase tracking-wider text-foreground"
 									>
-										Developer Name
+										Your Name
 									</Label>
 									<Input
 										id="dev-name"

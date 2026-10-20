@@ -180,7 +180,7 @@ export function FileImportDialog({ isOpen, onClose, onSuccess }: FileImportDialo
             <div>
               <h2 className="font-bold text-base text-foreground">Import Document</h2>
               <p className="text-xs text-muted-foreground">
-                Turn an existing file into a new editable developer note
+                Turn an existing file into a new editable note
               </p>
             </div>
           </div>

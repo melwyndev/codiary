@@ -448,7 +448,7 @@ ${content}`;
       label: 'Callout Box',
       description: 'Make key details or warnings stand out.',
       icon: <MessageSquareQuote className="w-4 h-4 text-amber-400" />,
-      snippet: '> [!NOTE]\n> Write key architectural decision or takeaway...\n',
+      snippet: '> [!NOTE]\n> Write key takeaway, reminder, or insight...\n',
       keywords: ['callout', 'note', 'alert', 'box', 'warning', 'info'],
     },
     {
@@ -472,7 +472,7 @@ ${content}`;
       label: 'Quote',
       description: 'Capture quotes or highlighted excerpts.',
       icon: <Quote className="w-4 h-4 text-rose-400" />,
-      snippet: '> "Clean code always looks like it was written by someone who cares."\n',
+      snippet: '> "Simplicity is the prerequisite for reliability."\n',
       keywords: ['quote', 'excerpt', 'citation'],
     },
     {

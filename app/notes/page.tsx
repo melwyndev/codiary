@@ -348,7 +348,7 @@ function NotesContent() {
 			<ToastContainer />
 
 			{/* Unified App Navbar — h-14, auth-conditional, consistent across all routes */}
-			<AppNavbar title="Developer Notes & Library" />
+			<AppNavbar title="Notes & Library" />
 
 			{/* Flex container for sidebar + main content */}
 			<div className="flex flex-1 min-h-0 h-[calc(100vh-3.5rem)] overflow-hidden">
