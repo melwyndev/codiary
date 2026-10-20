@@ -71,10 +71,14 @@ pnpm install
 ```
 
 ### 3. Configure Environment Variables
-Create a `.env.local` file in the project root:
+Copy `.env.example` to `.env.local` and configure your InsForge credentials:
+```bash
+cp .env.example .env.local
 ```
-NEXT_PUBLIC_INSFORGE_BASE_URL=https://hxpct5r5.eu-central.insforge.app
-NEXT_PUBLIC_INSFORGE_ANON_KEY=anon_22aa1ba06252dde17f0efd8bea0322d0ca8e6283d1c1f3610bad07f7c7319560
+
+```env
+NEXT_PUBLIC_INSFORGE_BASE_URL=https://your-project.region.insforge.app
+NEXT_PUBLIC_INSFORGE_ANON_KEY=your-insforge-anon-key
 ```
 
 ### 4. Run Development Server
