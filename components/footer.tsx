@@ -23,7 +23,7 @@ export function Footer() {
             {/* Sitemap links formatted identical to Navbar links */}
             <div className="grid grid-cols-2 gap-8 max-w-sm">
               <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Vault Resources</h4>
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Notes Drawer Resources</h4>
                 <ul className="space-y-2.5 text-xs font-bold uppercase tracking-widest text-neutral-600 dark:text-neutral-300">
                   <li><a href="#features" className="hover:text-neutral-950 dark:hover:text-white transition-colors">Workspace Features</a></li>
                   <li><a href="#" className="hover:text-neutral-950 dark:hover:text-white transition-colors">Documentation</a></li>
@@ -48,7 +48,7 @@ export function Footer() {
               <a href="#" className="hover:text-neutral-950 dark:hover:text-white transition-colors"><IconBrandTwitter className="size-5" /></a>
             </div>
             <div className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest">
-              © {new Date().getFullYear()} Codiary. Structured in private sandboxes.
+              © {new Date().getFullYear()} Codiary. Your thoughts, kept private and safe.
             </div>
           </div>
 

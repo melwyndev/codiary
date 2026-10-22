@@ -1,4 +1,4 @@
-# Codiary - Developer Notes & Architectural Vault
+# Codiary - Developer Notes & Architectural Notes Drawer
 
 Codiary is a developer notes workspace, code snippet repository, and architectural archive powered by **Next.js**, **Tailwind CSS**, and **InsForge BaaS**.
 
@@ -25,7 +25,7 @@ Import existing local notes or documentation directly into the workspace:
 - **Supported File Types**:
   - `.md` — Markdown document (extracts title from `# Heading` or file name)
   - `.txt` — Plain text note
-  - `.json` — Codiary note or multi-note vault export
+  - `.json` — Codiary note or notes drawer backup export
 - **File Size Limit**: Up to **10 MB** per imported document.
 
 ### 2. Document Attachments (File → Attached Asset in a Note)

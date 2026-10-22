@@ -329,7 +329,7 @@ function NotesContent() {
 					<div className="flex flex-col items-center gap-3 text-center">
 						<Loader2 className="w-8 h-8 animate-spin text-foreground" />
 						<p className="text-sm text-muted-foreground font-sans font-medium font-bold tracking-wider">
-							{isCreatingNew ? "CREATING NEW NOTE..." : "LOADING NOTE VAULT..."}
+							{isCreatingNew ? "CREATING NEW NOTE..." : "LOADING NOTES DRAWER..."}
 						</p>
 					</div>
 				</div>
@@ -397,7 +397,7 @@ function NotesContent() {
 
 								{/* Controls Group: Sort Selector + View Mode Switcher + NEW NOTE Button */}
 								<div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto justify-end">
-									{/* Vault Sorting Selector using Shadcn DropdownMenu */}
+									{/* Notes Drawer Sorting Selector using Shadcn DropdownMenu */}
 									<DropdownMenu>
 										<DropdownMenuTrigger asChild>
 											<Button

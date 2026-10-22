@@ -96,12 +96,12 @@ export function FileImportDialog({ isOpen, onClose, onSuccess }: FileImportDialo
       let content = rawText;
       let tags = ['imported'];
 
-      // If JSON backup, check if single note or vault export
+      // If JSON backup, check if single note or drawer export
       if (ext === '.json') {
         try {
           const parsed = JSON.parse(rawText);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Vault backup with multiple notes
+            // Drawer backup with multiple notes
             for (const item of parsed) {
               await createNoteInInsForge(
                 {
@@ -114,7 +114,7 @@ export function FileImportDialog({ isOpen, onClose, onSuccess }: FileImportDialo
                 user?.email,
               );
             }
-            showToast(`Imported ${parsed.length} notes from vault backup!`);
+            showToast(`Imported ${parsed.length} notes from notes drawer backup!`);
             setIsProcessing(false);
             if (onSuccess) onSuccess();
             onClose();
@@ -254,7 +254,7 @@ export function FileImportDialog({ isOpen, onClose, onSuccess }: FileImportDialo
             </div>
             <div className="p-2 rounded-xl bg-background border border-border/80 flex items-center gap-2">
               <span className="font-mono text-xs font-bold text-amber-500">.json</span>
-              <span className="text-[11px] text-muted-foreground truncate">Vault Data</span>
+              <span className="text-[11px] text-muted-foreground truncate">Notes Drawer Data</span>
             </div>
           </div>
         </div>

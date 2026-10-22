@@ -41,8 +41,8 @@ export function UserMenu() {
 
   const displayName = user.profile?.nickname || user.name || user.email?.split("@")[0] || "User";
 
-  // Export Entire Vault as JSON Backup
-  const handleExportVaultBackup = () => {
+  // Export Entire Notes Drawer as JSON Backup
+  const handleExportDrawerBackup = () => {
     try {
       const notesList = getNotes();
       const backupData = JSON.stringify(notesList, null, 2);
@@ -50,12 +50,12 @@ export function UserMenu() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `codiary-vault-backup-${new Date().toISOString().substring(0, 10)}.json`;
+      link.download = `codiary-drawer-backup-${new Date().toISOString().substring(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(url);
-      showToast("Vault backup downloaded (.json)");
+      showToast("Notes drawer backup downloaded (.json)");
     } catch (err) {
-      showToast("Failed to backup vault", "error");
+      showToast("Failed to backup notes drawer", "error");
     }
   };
 
@@ -150,17 +150,17 @@ export function UserMenu() {
 
           <DropdownMenuSeparator className="my-1 bg-border/60" />
 
-          {/* Vault Management Section */}
+          {/* Drawer Management Section */}
           <div className="px-3 py-1.5 text-[10px] font-sans font-black uppercase tracking-wider text-muted-foreground/75">
-            Vault Management
+            Notes Drawer Management
           </div>
 
           <DropdownMenuItem
-            onClick={handleExportVaultBackup}
+            onClick={handleExportDrawerBackup}
             className="cursor-pointer flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-foreground hover:bg-muted focus:bg-muted transition-colors"
           >
             <Download className="w-4 h-4 text-indigo-400" />
-            <span>Backup Vault</span>
+            <span>Backup Notes Drawer</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -168,7 +168,7 @@ export function UserMenu() {
             className="cursor-pointer flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-foreground hover:bg-muted focus:bg-muted transition-colors"
           >
             <UploadCloud className="w-4 h-4 text-emerald-400" />
-            <span>Import Vault</span>
+            <span>Import Notes Drawer</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -192,7 +192,7 @@ export function UserMenu() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Hidden file input for vault import */}
+      {/* Hidden file input for drawer import */}
       <input
         ref={fileInputRef}
         type="file"

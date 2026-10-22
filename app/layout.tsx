@@ -9,13 +9,13 @@ import { SmoothScroll } from "@/components/smooth-scroll";
 const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: "Codiary - Private Notes & Thought Vault",
-  description: "Secure, local-first private notes workspace, idea library, and personal knowledge vault powered by InsForge and Next.js.",
-  keywords: ["notes", "notebook", "note vault", "knowledge base", "ideas", "insforge", "nextjs"],
+  title: "Codiary - Private Notes Drawer",
+  description: "A simple, distraction-free notes drawer to write, organize, and keep your thoughts safe.",
+  keywords: ["notes", "notebook", "notes drawer", "ideas", "journal", "writing"],
   authors: [{ name: "Codiary Team" }],
   openGraph: {
-    title: "Codiary - Private Notes & Thought Vault",
-    description: "Secure, local-first private notes workspace and personal knowledge vault.",
+    title: "Codiary - Private Notes Drawer",
+    description: "A simple, distraction-free notes drawer to write, organize, and keep your thoughts safe.",
     type: "website",
     siteName: "Codiary",
   },

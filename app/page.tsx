@@ -13,7 +13,7 @@ export default function Home() {
 	const { user, loading } = useAuth();
 	const router = useRouter();
 
-	// Redirect authenticated users to their notes vault
+	// Redirect authenticated users to their notes drawer
 	useEffect(() => {
 		if (!loading && user) {
 			router.replace("/notes");

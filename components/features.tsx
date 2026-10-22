@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useState } from "react"
-import { IconChevronRight, IconCode, IconShieldLock, IconRefresh } from "@tabler/icons-react"
+import { IconChevronRight, IconFileImport, IconShieldLock, IconRefresh } from "@tabler/icons-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function Features() {
@@ -11,41 +11,40 @@ export function Features() {
   const featureSnippets = [
     {
       id: 1,
-      title: "Private Sandbox",
+      title: "100% Private & Safe",
       numberColor: "text-[#5c7ba8] dark:text-[#aac2ec]",
       icon: <IconShieldLock className="size-4 text-[#5c7ba8] dark:text-[#aac2ec]" />,
-      summary: "Local-first vault architecture with zero analytics tracking, ensuring your thoughts, documents, and notes remain your private asset.",
-      code: `// codiary.vault.config.json
+      summary: "Your notes belong only to you. We don't track your activity, show ads, or look at what you write—ever.",
+      code: `// Your Privacy Guarantee
 {
-  "storage": "local_sqlite_db",
-  "encryption": "AES-256-GCM",
-  "telemetry": false,
-  "sync": "offline_sandboxed"
+  "tracking": false,
+  "privacy": "strictly_confidential",
+  "your_data": "never_shared"
 }`
     },
     {
       id: 2,
-      title: "Debounced Autosave",
+      title: "Never Lose Your Work",
       numberColor: "text-[#bca462] dark:text-[#fae8b4]",
       icon: <IconRefresh className="size-4 text-[#bca462] dark:text-[#fae8b4]" />,
-      summary: "Focus entirely on writing. All your drafts, ideas, and markdown notes auto-save instantly to prevent working data loss.",
-      code: `// Autosave engine
-useDebouncedSave({
-  delayMs: 300,
-  target: "~/vault/notes/",
-  onSave: (file) => console.log("Saved: " + file.id)
+      summary: "Just write. Every word and edit saves automatically in the background, so you can close your window with complete peace of mind.",
+      code: `// Continuous Autosave
+saveStatus({
+  savedAutomatically: true,
+  lostWork: 0,
+  peaceOfMind: "guaranteed"
 })`
     },
     {
       id: 3,
-      title: "AI Auto-Organize",
+      title: "Bring Your Notes Along",
       numberColor: "text-[#b06060] dark:text-[#eba7a7]",
-      icon: <IconCode className="size-4 text-[#b06060] dark:text-[#eba7a7]" />,
-      summary: "Clean messy drafts automatically. The AI structures your writing, generates summaries, and categorizes note metadata.",
-      code: `// Embedded vector indexing
-const embed = await localAI.vectorize({
-  content: currentNote,
-  tags: ["ideas", "journal", "projects"]
+      icon: <IconFileImport className="size-4 text-[#b06060] dark:text-[#eba7a7]" />,
+      summary: "Moving from another app or text files? Simply drag and drop your existing notes right in to start writing immediately.",
+      code: `// Simple drag & drop import
+importNotes({
+  files: ["thoughts.txt", "ideas.md"],
+  setupTime: "instant"
 })`
     }
   ]
@@ -57,7 +56,7 @@ const embed = await localAI.vectorize({
         {/* Section Header */}
         <div className="pb-6">
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-sans font-black tracking-tight leading-[1.02] text-neutral-950 dark:text-white max-w-3xl">
-            The Building Blocks Of A Timeless Notes Vault.
+            Everything You Need to Think Clearly.
           </h2>
         </div>
 

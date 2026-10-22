@@ -2,13 +2,13 @@
 
 > **Framework:** Spec-Driven Development (SDD)  
 > **Status:** Implemented & Verified  
-> **Target System:** Developer Notes Workspace & Architectural Vault  
+> **Target System:** Developer Notes Workspace & Architectural Notes Drawer  
 
 ---
 
 ## 1. System Overview & Scope
 
-`Codiary` is an architectural knowledge vault and developer notes platform designed for software engineers. This specification outlines the functional and technical requirements implemented for the **Ajaia LLC Full Stack Product Engineer Assessment**.
+`Codiary` is an architectural notes drawer and developer notes platform designed for software engineers. This specification outlines the functional and technical requirements implemented for the **Ajaia LLC Full Stack Product Engineer Assessment**.
 
 ---
 
@@ -49,7 +49,7 @@
 - **Parsing Engine (Browser-Native)**:
   - `.md` Files: Extracts title from the first `# Heading` (falling back to sanitized filename) and parses body into block content.
   - `.txt` Files: Converts filename into document title and preserves plain text with code block detection.
-  - `.json` Files: Handles both individual note objects and multi-note vault backups, batch-importing all entries into InsForge PostgreSQL.
+  - `.json` Files: Handles both individual note objects and notes drawer backups, batch-importing all entries into InsForge PostgreSQL.
 - **Validation Rules**:
   - Whitelist: `.md`, `.txt`, `.json` (reject all other extensions).
   - Hard limit: 10,485,760 bytes (10 MB).

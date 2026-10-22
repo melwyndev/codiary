@@ -76,7 +76,6 @@ import {
   updateNoteInInsForge,
   deleteNoteFromInsForge,
   togglePinNote,
-  autoOrganizeNote,
   getAllUserTagsFromInsForge,
   getUserNotePermission,
   uploadNoteAttachmentToInsForge,
@@ -149,8 +148,6 @@ export default function NoteEditorPage({
 
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle');
   const [lastSavedTime, setLastSavedTime] = useState<string>(() => initialCached?.updatedAt || '');
-  const [isOrganizing, setIsOrganizing] = useState(false);
-  const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
 
@@ -578,53 +575,7 @@ ${content}`;
     }
   };
 
-  // AI Auto-Organize Trigger
-  const handleAIAutoOrganize = async () => {
-    if (!content.trim()) {
-      showToast('Add note content before running AI Auto-Organize');
-      return;
-    }
 
-    setIsOrganizing(true);
-    setAiMessage(null);
-
-    try {
-      const res = await fetch('/api/ai/organize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content, tags }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        throw new Error(data.error || 'Failed to organize note');
-      }
-
-      const organized = autoOrganizeNote(noteId, {
-        title: data.title,
-        summary: data.summary,
-        tags: data.tags,
-      });
-
-      if (organized) {
-        setNote(organized);
-        setTitle(organized.title);
-        setTags(organized.tags);
-        setAiMessage(
-          data.warning
-            ? `AI organized (Fallback Mode): ${data.warning}`
-            : 'Groq AI auto-organized your title, summary, and tags!'
-        );
-        showToast('AI auto-organization complete!');
-      }
-    } catch (err: any) {
-      console.error('AI auto-organize error:', err);
-      showToast(err.message || 'AI organization failed');
-    } finally {
-      setIsOrganizing(false);
-    }
-  };
 
   // Delete Note
   const handleDeleteNote = () => {
@@ -916,15 +867,6 @@ ${content}`;
 
           {/* NOTION DOCUMENT CANVAS */}
           <div className="max-w-6xl mx-auto px-6 sm:px-12 pt-10 pb-96 space-y-6">
-            {/* AI Alert Notification */}
-            {aiMessage && (
-              <Alert variant="default" className="border-amber-500/40 bg-amber-500/10 text-foreground text-xs rounded-2xl">
-                <Sparkles className="w-4 h-4 mr-2 text-amber-500" />
-                <AlertTitle className="font-semibold">AI Organization Complete</AlertTitle>
-                <AlertDescription>{aiMessage}</AlertDescription>
-              </Alert>
-            )}
-
             {/* Notion Top Trigger Bar (Hover Icon / Cover Actions) */}
             <div className="relative group flex items-center gap-3 text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors min-h-[36px]">
               {icon ? (

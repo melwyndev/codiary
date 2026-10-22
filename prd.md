@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-`Codiary` is a modern, AI-powered engineering notebook and collaborative document vault designed for developers, technical founders, and builders. It serves as an engineer's "second brain"—a single place to capture ideas, architecture decisions, research, code snippets, and working context.
+`Codiary` is a modern, AI-powered engineering notebook and collaborative notes drawer designed for developers, technical founders, and builders. It serves as an engineer's "second brain"—a single place to capture ideas, architecture decisions, research, code snippets, and working context.
 
 Codiary pairs a distraction-free block editor (with autosave, tag taxonomy, and inline image attachments) with automated AI organization (summaries, smart titles, and tagging), granular role-based sharing (`viewer` vs. `editor`), multi-format file import/export, and semantic search powered by vector embeddings.
 
@@ -27,7 +27,7 @@ The core product loop in Codiary:
 
 ## Product Summary
 
-`Codiary` is an AI-assisted knowledge vault and collaborative document workspace for software engineers. It combines fast capture, multi-format file import, AI-powered structure extraction, granular access permissions, and semantic vector recall in a high-contrast developer aesthetic.
+`Codiary` is an AI-assisted notes drawer and collaborative document workspace for software engineers. It combines fast capture, multi-format file import, AI-powered structure extraction, granular access permissions, and semantic vector recall in a high-contrast developer aesthetic.
 
 ---
 
@@ -41,7 +41,7 @@ The core product loop in Codiary:
 
 ## Core Value Proposition
 
-A unified, developer-native knowledge vault combining:
+A unified, developer-native notes drawer combining:
 - **Instant capture** with multi-format imports and debounced autosave.
 - **AI-driven metadata** that organizes without destroying user intent.
 - **Granular sharing** with real-time role-based access control.

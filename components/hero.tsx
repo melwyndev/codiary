@@ -32,17 +32,17 @@ export function Hero() {
         {/* Center Grid Block: Massive Editorial Typography with Tight Spacing */}
         <div className="md:col-span-6 px-6 sm:px-8 py-16 text-center flex flex-col items-center justify-center space-y-3.5">
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-sans font-black tracking-tight leading-[0.98] text-neutral-950 dark:text-white">
-            A Note Vault for What’s Ahead.
+            A Notes Drawer for What’s Ahead.
           </h1>
           <p className="text-base md:text-lg font-normal text-neutral-700 dark:text-neutral-300 max-w-lg leading-relaxed pt-1">
-            Codiary is a private, AI-powered notes archive built to capture ideas, organize thoughts, document projects, and retrieve them via semantic search.
+            Codiary is a simple, private space for everything on your mind. Jot down daily notes, organize your ideas, and easily find anything whenever you need it.
           </p>
           <div className="pt-2">
             <Button
               asChild
               className="btn-standard"
             >
-              <a href="#features">Explore Features</a>
+              <a href="#features">See How It Works</a>
             </Button>
           </div>
         </div>

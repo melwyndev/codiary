@@ -218,7 +218,7 @@ export function CommandPalette() {
           {/* Notes Search Results */}
           <div className="space-y-1 pt-2">
             <div className="px-3 py-1.5 text-[10px] font-sans font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
-              <span>Notes Vault ({filteredNotes.length})</span>
+              <span>Notes Drawer ({filteredNotes.length})</span>
               {query !== '' && <span className="text-[9px]">Press Enter to Open</span>}
             </div>
 

@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     const title = searchParams.get('title') || 'Codiary Note';
-    const summary = searchParams.get('summary') || 'Private AI-Powered Personal Knowledge Vault.';
+    const summary = searchParams.get('summary') || 'Private AI-Powered Personal Notes Drawer.';
     const tagsParam = searchParams.get('tags') || 'ideas,notes';
     const tags = tagsParam.split(',').filter(Boolean);
 
@@ -71,7 +71,7 @@ export async function GET(request: Request) {
                   color: 'transparent',
                 }}
               >
-                Codiary Note Vault
+                Codiary Notes Drawer
               </span>
             </div>
 

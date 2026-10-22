@@ -117,7 +117,7 @@ export function LoginForm({ defaultMode }: { defaultMode?: 'signin' | 'signup' }
         </div>
         <h1 className="text-2xl font-black tracking-tight text-foreground">
           {mode === 'signin' && 'Sign In to Codiary'}
-          {mode === 'signup' && 'Create Your Note Vault'}
+          {mode === 'signup' && 'Create Your Notes Drawer'}
           {mode === 'verify' && 'Verify Your Email'}
         </h1>
         <p className="text-xs text-muted-foreground">

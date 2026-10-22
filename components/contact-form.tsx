@@ -92,7 +92,7 @@ export function ContactForm() {
 					<h2 className="text-4xl md:text-6xl lg:text-7xl font-sans font-black tracking-tight leading-[1.02] text-neutral-950 dark:text-white">
 						Ready to Begin?
 						<br />
-						Your Private Note Vault Starts Here.
+						Your Private Notes Drawer Starts Here.
 					</h2>
 
 					<div className="w-full max-w-sm pt-4 md:pt-6">
@@ -100,18 +100,18 @@ export function ContactForm() {
 							<div className="border-[0.5px] border-neutral-900 dark:border-white/20 bg-white dark:bg-[#121212] p-8 space-y-4 animate-in fade-in zoom-in-95 duration-300">
 								<IconCheck className="size-8 mx-auto text-emerald-600 bg-neutral-100 dark:bg-neutral-800 border-[0.5px] border-neutral-900 dark:border-white/20 p-1 rounded-full animate-bounce" />
 								<h3 className="text-sm font-bold uppercase tracking-wider">
-									Vault Space Allocated
+									You're On The List!
 								</h3>
 								<p className="text-sm text-neutral-800 dark:text-neutral-200 font-normal leading-relaxed">
 									Thank you,{" "}
 									<span className="font-semibold text-neutral-950 dark:text-white">
 										{formData.name}
 									</span>
-									. We have queued your early access request for{" "}
+									. We received your request for{" "}
 									<code className="bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 text-neutral-950 dark:text-white">
 										{formData.email}
 									</code>
-									. An invitation link will be sent shortly.
+									. We'll email you an invite as soon as early access opens.
 								</p>
 								<Button
 									variant="link"
@@ -147,7 +147,7 @@ export function ContactForm() {
 										htmlFor="dev-email"
 										className="pl-2 text-xs font-bold uppercase tracking-wider text-foreground"
 									>
-										Secure Email
+										Your Email
 									</Label>
 									<Input
 										id="dev-email"
@@ -169,10 +169,10 @@ export function ContactForm() {
 									{status === "loading" ? (
 										<span className="flex items-center justify-center gap-1.5">
 											<IconLoader2 className="size-4 animate-spin" />
-											<span>Requesting Vault...</span>
+											<span>Saving your spot...</span>
 										</span>
 									) : (
-										<span>Request Vault Invitation</span>
+										<span>Get Early Access</span>
 									)}
 								</Button>
 							</form>
